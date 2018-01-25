@@ -39,6 +39,7 @@ void CDlgAnswer::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_BUTTON_GetQuestion, m_btnUpdateQuestion);
 	DDX_Control(pDX, IDC_BUTTON_STARTANSWER, m_btnStartAnswer);
 	DDX_Control(pDX, IDC_BUTTON_STOPANSWER, m_btnStopAnswer);
+	DDX_Control(pDX, IDC_BUTTON_RESET, m_btnResetQuestion);
 }
 
 
@@ -186,6 +187,11 @@ void CDlgAnswer::OnBnClickedButtonGetquestion()
 	OutputDebugStringA(cJsonStr);
 	OutputDebugStringA("\r\n");
 	m_pSignalInstance->sendInstantMsg(m_serverAccount, cJsonStr);
+
+	m_ckAnswerA.SetCheck(FALSE);
+	m_ckAnswerB.SetCheck(FALSE);
+	m_ckAnswerC.SetCheck(FALSE);
+	m_ckAnswerD.SetCheck(FALSE);
 }
 
 void CDlgAnswer::OnBnClickedButtonStartMark()
@@ -243,8 +249,14 @@ HRESULT CDlgAnswer::onLoginSuccess(WPARAM wParam, LPARAM lParam)
 	OutputDebugStringA(__FUNCTION__);
 	OutputDebugStringA("\r\n");
 
+	std::string curLanguage = gHQConfig.getLanguage();
+	if ("" == curLanguage){
+		curLanguage = "0";
+		gHQConfig.setLanguage(curLanguage);
+	}
+
 	char cJsonStr[512] = { '\0' };
-	sprintf_s(cJsonStr, "{\"type\":\"RequestChannelName\"}");
+	sprintf_s(cJsonStr, "{\"type\":\"RequestChannelName\",\"QuestionLanguage\":\"%s\"}",curLanguage.data());
 	OutputDebugStringA(cJsonStr);
 	OutputDebugStringA("\r\n");
 	m_pSignalInstance->sendInstantMsg(m_serverAccount, cJsonStr);
@@ -355,6 +367,7 @@ HRESULT CDlgAnswer::onMessageInstantReceive(WPARAM wParam, LPARAM lParam)
 		lpData->account = m_account;
 		lpData->channelname = channelName;
 		::PostMessage(theApp.GetMainWnd()->m_hWnd, (WM_NewChannelName), (WPARAM)lpData, NULL);
+		m_trlQuestion.SetWindowTextW(_T("Click the Join Channel button on the left to send the video to the Audience!"));
 	}
 	else if ("quiz" == msgType){
 		tagQuestionAnswer answerTemp;
@@ -482,9 +495,17 @@ void CDlgAnswer::OnClose()
 
 void CDlgAnswer::switchNewQuestion(const tagQuestionAnswer &newQuestion)
 {
+	m_btnStartAnswer.ShowWindow(SW_SHOW);
+	m_btnStopAnswer.ShowWindow(SW_SHOW);
+	m_btnResetQuestion.ShowWindow(SW_SHOW);
+	m_ckAnswerA.ShowWindow(SW_SHOW);
+	m_ckAnswerB.ShowWindow(SW_SHOW);
+	m_ckAnswerC.ShowWindow(SW_SHOW);
+	m_ckAnswerD.ShowWindow(SW_SHOW);
+
 	m_nQuestionId = newQuestion.questionId;
 	char chQuestionTitle[2048] = { '\0' };
-	sprintf_s(chQuestionTitle, "µÚ%dÌâ: %s", m_nQuestionId + 1, newQuestion.strQuestion.data());
+	sprintf_s(chQuestionTitle, "%d: %s", m_nQuestionId + 1, newQuestion.strQuestion.data());
 	m_trlQuestion.SetWindowTextW(s2cs(chQuestionTitle));
 	m_ckAnswerA.SetWindowTextW(s2cs(newQuestion.vecQuestionAnswers[0]));
 	m_ckAnswerB.SetWindowTextW(s2cs(newQuestion.vecQuestionAnswers[1])); 
@@ -504,8 +525,28 @@ void CDlgAnswer::notifyQuestionAnswerStatics(const tagQuestionStatics &QuestionS
 	}
 	rect.left = rect.left - 100;
 	//rect.right = rect.right + 100;
+	switch (QuestionStatics.nresult)
+	{
+	case 0:m_ckAnswerA.SetCheck(TRUE); m_ckAnswerB.SetCheck(FALSE); m_ckAnswerC.SetCheck(FALSE); m_ckAnswerD.SetCheck(FALSE);
+		break;
+	case 1:m_ckAnswerA.SetCheck(FALSE); m_ckAnswerB.SetCheck(TRUE); m_ckAnswerC.SetCheck(FALSE); m_ckAnswerD.SetCheck(FALSE);
+		break;
+	case 2:m_ckAnswerA.SetCheck(FALSE); m_ckAnswerB.SetCheck(FALSE); m_ckAnswerC.SetCheck(TRUE); m_ckAnswerD.SetCheck(FALSE);
+		break;;
+	case 3:m_ckAnswerA.SetCheck(FALSE); m_ckAnswerB.SetCheck(FALSE); m_ckAnswerC.SetCheck(FALSE); m_ckAnswerD.SetCheck(TRUE);
+		break;
+	default:
+		break;
+	}
+
 	m_DlgResult.ShowWindow(SW_SHOW);
 	m_DlgResult.MoveWindow(&rect, TRUE);
 	m_DlgResult.setContext(QuestionStatics);
 }
 
+void CDlgAnswer::updateStatusToPublish()
+{
+	m_trlQuestion.SetWindowTextW(_T("Congratulations, you have joined the room channel, please click the SendQuestion button below to get the Question!"));
+	m_btnUpdateQuestion.ShowWindow(SW_SHOW);
+	m_btnStopAnswer.ShowWindow(SW_SHOW);
+}

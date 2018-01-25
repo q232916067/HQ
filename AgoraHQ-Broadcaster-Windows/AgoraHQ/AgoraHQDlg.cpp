@@ -390,6 +390,9 @@ LRESULT CAgoraHQDlg::onJoinChannelSuccess(WPARAM wParam, LPARAM lParam)
 	delete lpData;
 
 	m_btnJoinChannel.SetWindowTextW(_T("LeaveChannel"));
+	if (nullptr != m_pDlgAnswer){
+		m_pDlgAnswer->updateStatusToPublish();
+	}
 
 	return 0;
 }

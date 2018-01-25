@@ -37,6 +37,7 @@ void CDlgConfig::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_EDIT_ChannelName, m_edChannelName);
 	DDX_Control(pDX, IDC_BUTTON_VIDEOTEST, m_btnSatrtPreview);
 	DDX_Control(pDX, IDC_STATIC_VIDEOTEST, m_trlTestVideo);
+	DDX_Control(pDX, IDC_COMBO_LANGUAGE, m_comLanguage);
 }
 
 
@@ -90,6 +91,8 @@ void CDlgConfig::OnBnClickedButtonConfigSave()
 	gHQConfig.setVideoSolutinIndex(int2str(nVideoIndexCurSel));
 	m_edChannelName.GetWindowTextW(strParam);
 	gHQConfig.setChannelName(cs2s(strParam));
+	int nLanguage = m_comLanguage.GetCurSel();
+	gHQConfig.setLanguage(int2str(nLanguage));
 	
 	int nCurSel = m_comCamera.GetCurSel();
 	CAgoraCameraManager CameraManager;
@@ -214,6 +217,15 @@ void CDlgConfig::initCtrl()
 	m_edMediaUid.SetWindowTextW(s2cs(strMediaUid));
 	std::string strChannelName = gHQConfig.getChannelName();
 	m_edChannelName.SetWindowTextW(s2cs(strChannelName));
+	
+	m_comLanguage.AddString(_T("English"));
+	m_comLanguage.AddString(_T("Chinese"));
+	std::string curLanguage = gHQConfig.getLanguage();
+	if ("" == curLanguage || "0" == curLanguage){
+		curLanguage = "0";
+	}
+	gHQConfig.setLanguage(curLanguage);
+	m_comLanguage.SetCurSel(str2int(curLanguage));
 
 	std::string strVideoIndex = gHQConfig.getVideoSolutinIndex();
 	if ("" == strVideoIndex)

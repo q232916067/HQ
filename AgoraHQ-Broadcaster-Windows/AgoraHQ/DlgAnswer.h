@@ -14,6 +14,7 @@ class CDlgAnswer : public CDialogEx
 public:
 	CDlgAnswer(CWnd* pParent = NULL);   // 标准构造函数
 	virtual ~CDlgAnswer();
+	void updateStatusToPublish();
 
 // 对话框数据
 	enum { IDD = IDD_DIALOG_ANSWER };
@@ -85,6 +86,7 @@ private:
 	CAGButton m_btnUpdateQuestion;
 	CAGButton m_btnStartAnswer;
 	CAGButton m_btnStopAnswer;
+	CButton m_btnResetQuestion;
 	
 	CDlgAnswerResultStatics m_DlgResult;
 	int m_nQuestionId;
