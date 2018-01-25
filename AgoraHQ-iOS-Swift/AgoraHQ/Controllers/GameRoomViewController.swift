@@ -58,6 +58,7 @@ class GameRoomViewController: UIViewController {
         
         chatTableView.rowHeight = UITableViewAutomaticDimension
         chatTableView.estimatedRowHeight = 44
+        addTouchEventToTableView(chatTableView)
         addKeyboardObserver()
         joinMediaChannel()
         addgradientLayer()
@@ -102,7 +103,7 @@ class GameRoomViewController: UIViewController {
         }
         
         poster.delegate = self
-        let paramDic = ["uid": UserDefaults.standard.string(forKey: "RCUid")! ,
+        let paramDic = ["uid": UserDefaults.standard.string(forKey: "account")! ,
                         "gid": channelName!]
         poster.postAction(to: reliveUrl, with: paramDic)
     }
@@ -175,8 +176,9 @@ class GameRoomViewController: UIViewController {
     // 检查是否可以答题
     func checkStatus() {
         geter.delegate = self
-        let paramDic = ["uid": UserDefaults.standard.string(forKey: "RCUid")! ,
+        let paramDic = ["uid": UserDefaults.standard.string(forKey: "account")! ,
                         "gid": channelName!]
+        print(paramDic)
         geter.getAction(to: getStatusUrl, with: paramDic)
     }
 }
@@ -233,7 +235,7 @@ extension GameRoomViewController: AgoraRtcEngineDelegate {
         canvas.view = hostView
         canvas.renderMode = .render_Hidden
         rtcEngine.setupRemoteVideo(canvas)
-        print("===================didJoinedOfUid \(uid)============================")
+        print("===================did Joined Of Uid \(uid)============================")
     }
     
     func rtcEngine(_ engine: AgoraRtcEngineKit, didOfflineOfUid uid: UInt, reason: AgoraRtcUserOfflineReason) {
@@ -275,7 +277,7 @@ extension GameRoomViewController: AgoraHQSigDelegate{
     }
     
     func agoraHQSig(_ agoraHQSig: AgoraHQSigKit!, didReceivedChannelMessage channel: String!, message: String!, messageId: Int64) {
-        print(message!)
+        print("=============",message!,"===============")
         let data = message.data(using: String.Encoding.utf8)
         do {
             let jsonData: NSDictionary = try JSONSerialization.jsonObject(with: data!, options: .mutableContainers) as! NSDictionary
@@ -361,7 +363,7 @@ extension GameRoomViewController: UITextFieldDelegate {
         self.updateChatView()
         self.chatMessgaeTestField.text = ""
         
-        print("==============message send success=================")
+        print("==============message send success \(messageJson)=================")
 
         return true
     }
@@ -395,6 +397,18 @@ extension GameRoomViewController: UITableViewDataSource {
         tableView.endUpdates()
         
         tableView.scrollToRow(at: insertIndexPath, at: .bottom, animated: false)
+    }
+    
+    func addTouchEventToTableView(_ tableView: UITableView) {
+        let tableViewGesture = UITapGestureRecognizer(target: self, action: #selector(tableViewTouchInSide))
+        tableViewGesture.numberOfTapsRequired = 1
+        tableViewGesture.cancelsTouchesInView = false
+        tableView.addGestureRecognizer(tableViewGesture)
+    }
+    
+    @objc func tableViewTouchInSide() {
+        self.chatMessgaeTestField.resignFirstResponder()
+        inputContainerView.isHidden = true
     }
 }
 
