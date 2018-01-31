@@ -296,6 +296,14 @@ HQ.GameMaker = function () {
                 logger.error(`agora cm login failed`);
                 reject("failed");
             };
+
+            server.sig.onLogout  = function () {
+                logger.warn("Server has logged out, will try to reconnect in 10 seconds");
+                server.sig = null;
+                setTimeout( function() {
+                    server.init();
+                }, 10 * 1000);
+            };
         });
     };
 };
