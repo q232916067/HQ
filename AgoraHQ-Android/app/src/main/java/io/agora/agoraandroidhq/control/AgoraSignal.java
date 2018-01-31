@@ -130,7 +130,7 @@ public class AgoraSignal {
         if(agoraHQSigSDK!=null){
             GameControl.logD("sendChannelMessage  =");
             GameControl.logD("agoraHQSigSDK  =  " + agoraHQSigSDK);
-            agoraHQSigSDK.sendChannelMessage(GameControl.a++, message);
+            agoraHQSigSDK.sendChannelMessage(GameControl.MESSAGE_ID++, message);
             if(selfMessage!=null) {
                 handlerEvent(io.agora.agoraandroidhq.tools.Constants.AGORA_SIGNAL_SEND, selfMessage);
             }

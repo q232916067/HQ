@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_name">Agora Trivia</string>
     <string name="net_error">Net error</string>
     <string name="error_to_resolve_token">Error to resolve token</string>
     <string name="next_game_time">Next Game Time</string>
@@ -21,5 +22,8 @@
     <string name="login_agora_signal_fail">Login Fail</string>
     <string name="login_agora_signal_success">Login Success</string>
     <string name="game_cannot_play">eliminated !</string>
+    <string name="text_do_not_have_permission">You do not have permission!</string>
+    <string name="app_title">Agora Trivia</string>
+    <string name="text_channel_name_can_not_be_null">Channel Name can not be null</string>
 
 </resources>

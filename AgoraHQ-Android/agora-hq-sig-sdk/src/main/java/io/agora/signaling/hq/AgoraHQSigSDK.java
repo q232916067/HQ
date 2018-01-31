@@ -668,7 +668,7 @@ public class AgoraHQSigSDK {
 
         postStatistics();
         stopStatisticsTimer();
-        statisticsItem = null;
+        // statisticsItem = null;
 
         mRcAppId = null;
 
@@ -693,8 +693,11 @@ public class AgoraHQSigSDK {
                 }
 
                 String json = statisticsItem.convertToJson();
+                if(statisticsItem != null) {
+                    statisticsItem.clear();
+                }
                 new HttpUrlUtils().execHttpSyncTask(Constants.URL_POST_STATISTICS_, true, null, json);
-                statisticsItem.clear();
+
             }
         }, 0, 30000);
     }

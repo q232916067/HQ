@@ -1,5 +1,8 @@
 package io.agora.agoraandroidhq.module;
 
+import android.graphics.drawable.Drawable;
+import android.widget.ImageView;
+
 import java.util.Random;
 
 
@@ -38,5 +41,8 @@ public class User {
     public String getChannelName(){
         return channelName;
     }
+
+    public Drawable drawable;
+
 
 }

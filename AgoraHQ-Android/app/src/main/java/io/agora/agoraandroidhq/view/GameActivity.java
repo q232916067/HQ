@@ -91,6 +91,8 @@ public class GameActivity extends Activity {
     private User getUser() {
 
         User currentUser = new User();
+        currentUser.name = GameControl.currentUserName;
+        currentUser.drawable = GameControl.currentUserHeadImage;
         String channelName = getChannelName();
         currentUser.setChannelName(channelName);
         GameControl.currentUser = currentUser;
@@ -288,6 +290,7 @@ public class GameActivity extends Activity {
                     String content = jsonObjects.getContent();
                     GameControl.logD("sendMessage = ");
                     io.agora.agoraandroidhq.module.Message message = new io.agora.agoraandroidhq.module.Message(sendName, content);
+                    message.setIsMe(true);
                     messageRecyclerViewAdapter.updateData(message);
 
 
