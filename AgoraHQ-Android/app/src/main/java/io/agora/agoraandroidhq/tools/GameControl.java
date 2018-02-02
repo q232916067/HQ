@@ -39,5 +39,10 @@ public class GameControl {
         Log.d("agora_signal", message);
     }
 
+    public static int timeOut = 10;
+
+    public static int total = 10;
+
+    public static boolean gameResult = true;
 
 }

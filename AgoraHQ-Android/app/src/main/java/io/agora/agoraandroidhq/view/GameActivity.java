@@ -66,6 +66,7 @@ public class GameActivity extends Activity {
 
 
     private boolean isFirst = true;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -83,8 +84,6 @@ public class GameActivity extends Activity {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-
     }
 
 
@@ -110,7 +109,7 @@ public class GameActivity extends Activity {
         initQuestionLayout();
 
         //startCheckWheatherCanPlay();
-       // checkWheatherCanPlay();
+        // checkWheatherCanPlay();
         GameControl.controlCheckThread = true;
 
         getUser();
@@ -145,6 +144,7 @@ public class GameActivity extends Activity {
 
     }
 
+    private boolean wheatherChangeGameReuslt = true;
 
     private Handler agoraHandler = new Handler() {
         @Override
@@ -173,7 +173,7 @@ public class GameActivity extends Activity {
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
-                    GameControl.logD("AGORA_SIGNAL_RECEIVE   =  " + mess);
+                    GameControl.logD("AGORA_SIGNAL_RECEIVE   =  " + mess + "  strinType = " + JsonToString.strinType);
                     switch (JsonToString.strinType) {
 
                         case "chat":
@@ -197,35 +197,50 @@ public class GameActivity extends Activity {
 
                                 if (correct == 0) {
                                     int answer = res + 1;
-                                    time_reduce.setText(getString(R.string.answer_error_message) + "  " + answer);
+                                    time_reduce.setText(getString(R.string.answer_error_message));
 
-                                        time_reduce.setTextColor(Color.RED);
-                                        time_reduce.setVisibility(View.VISIBLE);
-                                        //game_title.setVisibility(View.INVISIBLE);
-                                        GameControl.clientWheatherCanPlay = false;
+                                    time_reduce.setTextColor(Color.RED);
+                                    time_reduce.setVisibility(View.VISIBLE);
+                                    //game_title.setVisibility(View.INVISIBLE);
+                                    GameControl.clientWheatherCanPlay = false;
 
-                                        if (questionTime != 0 && (questionTime != 10)) {
-                                            questionTime = 0;
-                                        }
-
-                                    } else {
-                                        time_reduce.setText(R.string.answer_correct_message);
-                                        time_reduce.setTextColor(Color.RED);
-                                        time_reduce.setVisibility(View.VISIBLE);
-                                        //game_title.setVisibility(View.INVISIBLE);
-                                        GameControl.clientWheatherCanPlay = true;
-
-                                        if (questionTime != 0 && (questionTime != 10)) {
-                                            questionTime = 0;
-                                        }
+                                    if (questionTime != 0 && (questionTime != GameControl.timeOut)) {
+                                        questionTime = 0;
                                     }
+
+                                    if (wheatherChangeGameReuslt) {
+
+                                        GameControl.gameResult = false;
+                                        wheatherChangeGameReuslt = false;
+                                    }
+
+                                } else {
+
+
+                                    time_reduce.setText(R.string.answer_correct_message);
+                                    time_reduce.setTextColor(Color.GREEN);
+                                    time_reduce.setVisibility(View.VISIBLE);
+                                    //game_title.setVisibility(View.INVISIBLE);
+                                    GameControl.clientWheatherCanPlay = true;
+
+                                    if (questionTime != 0 && (questionTime != GameControl.timeOut)) {
+                                        questionTime = 0;
+                                    }
+                                }
+
 
                                 questionTimeHandler.sendEmptyMessageDelayed(1, 5000);
                                 //time_reduce.setVisibility(View.INVISIBLE);
                                 game_layout.setVisibility(View.VISIBLE);
                                 submit_btn.setVisibility(View.GONE);
                                 getCorrectCheckBox(res);
+
+
+                                if ((GameControl.currentQuestion.getId() + 1) == GameControl.total) {
+                                    questionTimeHandler.sendEmptyMessageDelayed(2, 6000);
+                                }
                             }
+
 
                             logD(" Serverwheather " + GameControl.serverWheatherCanPlay + "  " + "ClientServer  " + GameControl.clientWheatherCanPlay);
 
@@ -247,19 +262,37 @@ public class GameActivity extends Activity {
                                 showquestionView(question);
 
                             }*/
-                            if (question != null) {
-
-                                GameControl.setCurrentQuestion(question);
+                            if (question.getId() == 1) {
+                                GameControl.gameResult = true;
+                                wheatherChangeGameReuslt = true;
                             }
 
-                            logD("quiz   showQuestion" +isFirst);
+
+                            GameControl.logD("save Question :  id = " + question.getId() + "  " + question.getTimeOut());
+
+                            if (question != null) {
+                                GameControl.setCurrentQuestion(question);
+                                int total = GameControl.currentQuestion.getTotalQuestion();
+                                int timeOut = GameControl.currentQuestion.getTimeOut();
+
+                                if (total != 0) {
+                                    GameControl.total = total;
+                                }
+
+                                if (timeOut != 0) {
+                                    GameControl.timeOut = timeOut;
+                                    time_reduce.setText(timeOut+" s");
+                                }
+                            }
+
+                            logD("quiz   showQuestion" + isFirst);
                             //showQuestion();
                             //showquestionView(GameControl.currentQuestion);
                             try {
-                                if(! isFirst) {
+                                if (!isFirst) {
                                     checkWheatherCanPlay();
 
-                                    isFirst =false;
+                                    isFirst = false;
                                 }
                             } catch (JSONException e) {
                                 e.printStackTrace();
@@ -324,7 +357,7 @@ public class GameActivity extends Activity {
     }
 
 
-   private void startCheckWheatherCanPlay() {
+    private void startCheckWheatherCanPlay() {
         new Thread() {
             @Override
             public void run() {
@@ -335,20 +368,20 @@ public class GameActivity extends Activity {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                    GameControl.logD("startCheckWheatherCanPalyThread");
+                GameControl.logD("startCheckWheatherCanPalyThread");
 
-                    try {
-                        if(isFirst) {
-                            checkWheatherCanPlay();
+                try {
+                    if (isFirst) {
+                        checkWheatherCanPlay();
 
-                            isFirst =false;
-                        }
-                    } catch (JSONException e) {
-                        e.printStackTrace();
+                        isFirst = false;
                     }
-
-
+                } catch (JSONException e) {
+                    e.printStackTrace();
                 }
+
+
+            }
 
         }.start();
     }
@@ -480,6 +513,7 @@ public class GameActivity extends Activity {
         }
         // AgoraLinkToCloud.addEventHandler(handler);
 
+        gameResult = findViewById(R.id.game_result);
     }
 
 
@@ -499,7 +533,7 @@ public class GameActivity extends Activity {
                     return;
                 }
 
-               // isFirst = false;
+                // isFirst = false;
 
                 if (data != null) {
                     JSONObject object = new JSONObject(data);
@@ -522,11 +556,14 @@ public class GameActivity extends Activity {
         GameControl.controlCheckThread = false;
         GameControl.currentQuestion = null;
         questionFlag = false;
-        agoraSignal.removeEnventHandler();
-        agoraSignal.onLogoutSDKClick();
 
+        if (agoraSignal != null) {
+            agoraSignal.removeEnventHandler();
+            agoraSignal.onLogoutSDKClick();
 
+        }
         leaveChannel();
+        RtcEngine.destroy();
 
     }
 
@@ -580,30 +617,37 @@ public class GameActivity extends Activity {
         }
 
         @Override
-        public void onReceiveSEI(String info) {
+        public void onReceiveSEI(final String info) {
             super.onReceiveSEI(info);
             GameControl.logD("onReceiveSEI  = " + info);
 
-            JSONObject jsonObject = null;
-            int sid = -1;
-            if (info != null) {
-                try {
-                    jsonObject = new JSONObject(info);
-                    // sid = jsonObject.g etInt("questionId");
-                    JSONObject data = jsonObject.getJSONObject("data");
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    JSONObject jsonObject = null;
+                    int sid = -1;
+                    if (info != null) {
+                        try {
+                            jsonObject = new JSONObject(info);
+                            // sid = jsonObject.g etInt("questionId");
+                            JSONObject data = jsonObject.getJSONObject("data");
 
-                    sid = data.getInt("questionId");
-                } catch (JSONException e) {
-                    e.printStackTrace();
+                            sid = data.getInt("questionId");
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+
+                        if (GameControl.currentQuestion != null) {
+                            logD("sei   = " + sid + "   questionId  =  " + GameControl.currentQuestion.getId());
+
+                            if (sid == GameControl.currentQuestion.getId()) {
+                                logD("sei  show");
+                                showQuestion();
+                            }
+                        }
+                    }
                 }
-
-                logD("sei   = " + sid + "   questionId  =  " + GameControl.currentQuestion.getId());
-
-                if (sid == GameControl.currentQuestion.getId()) {
-                    logD("sei  show");
-                    showQuestion();
-                }
-            }
+            });
         }
     };
 
@@ -621,10 +665,10 @@ public class GameActivity extends Activity {
                     GameControl.logD("questionReduceTime  =  " + questime);
                     if (questime < 0) {
 
-                        questionTime = 10;
+                        questionTime = GameControl.timeOut;
                         return;
                     }
-
+                    time_reduce.setTextColor(Color.RED);
                     time_reduce.setText(questime + " s");
 
                     if (questime == 0) {
@@ -637,7 +681,7 @@ public class GameActivity extends Activity {
                             Toast.makeText(GameActivity.this, "you can not play", Toast.LENGTH_SHORT).show();
                         }
                         game_layout.setVisibility(View.GONE);
-                        questionTime = 10;
+                        questionTime = GameControl.timeOut;
                     }
                     break;
 
@@ -645,22 +689,27 @@ public class GameActivity extends Activity {
 
                     if (game_layout.getVisibility() == View.VISIBLE) {
                         game_layout.setVisibility(View.GONE);
-                        time_reduce.setText(10 + " s");
+                        time_reduce.setTextColor(Color.RED);
+                        time_reduce.setText(GameControl.timeOut + " s");
                     }
                     break;
+
+                case 2:
             }
         }
 
     };
 
-    private int questionTime = 10;
+    private int questionTime;
+    private ImageView gameResult;
+
 
     private void showQuestion() {
 
         new Thread() {
             @Override
             public void run() {
-                questionTime = 10;
+                questionTime = GameControl.timeOut;
 
                 while (questionFlag) {
                     try {
@@ -794,8 +843,19 @@ public class GameActivity extends Activity {
 
 
     private void joinAgoraLiveChannel() throws Exception {
-        initAgoraEngine();
-        setupVideoProfile();
+        new Thread() {
+            @Override
+            public void run() {
+                super.run();
+                try {
+                    initAgoraEngine();
+                    setupVideoProfile();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+            }
+        }.start();
         //joinChannel();
     }
 
@@ -816,7 +876,7 @@ public class GameActivity extends Activity {
 
 
     private void initAgoraEngine() throws Exception {
-        rtcEngine = RtcEngine.create(getBaseContext(), Constants.AGORA_APP_ID, mRtcEventHandler);
+        rtcEngine = RtcEngine.create(GameActivity.this, Constants.AGORA_APP_ID, mRtcEventHandler);
         rtcEngine.setChannelProfile(io.agora.rtc.Constants.CHANNEL_PROFILE_LIVE_BROADCASTING);
         rtcEngine.setClientRole(io.agora.rtc.Constants.CLIENT_ROLE_AUDIENCE, null);
         GameControl.logD("channelName   account  = " + GameControl.currentUser.channelName + "   " + GameControl.currentUser.account);
@@ -952,6 +1012,7 @@ public class GameActivity extends Activity {
 
         //  Toast.makeText(GameActivity.this, builder.toString(), Toast.LENGTH_SHORT).show();
 
+        GameControl.logD("submit answer  url = "+Constants.HTTP_SEND_ANSWER_TO_SERVER);
         try {
             AgoraSignal.sendAnswerToserver(GameControl.currentQuestion.getId(), a, new HttpUrlUtils.OnResponse() {
                 @Override
@@ -970,7 +1031,7 @@ public class GameActivity extends Activity {
         board.clear();
         // questionData.clear();
         game_layout.setVisibility(View.GONE);
-        questionTime = 10;
+        questionTime = GameControl.timeOut;
 
     }
 
@@ -1030,7 +1091,7 @@ public class GameActivity extends Activity {
 
         logD("showQuestionend   : " + question.getAnswerString().toString());
         logD("showQuestionend   :" + checkBox_item.size() + " ------  question  ---" + game_layout.getVisibility() + "   " + View.VISIBLE);
-        time = 10;
+        //time = 10;
     }
 
 
@@ -1077,7 +1138,7 @@ public class GameActivity extends Activity {
     }
 
 
-    private int time = 10;
+    //private int time = 10;
 
     private CheckBox createCheckBox(String text, int position) {
 
@@ -1128,7 +1189,7 @@ public class GameActivity extends Activity {
 
             if (tag.equals(positions + "")) {
                 GameControl.logD("correctChild  =  setBackGround");
-                view.setBackgroundColor(Color.RED);
+                view.setBackgroundColor(Color.GREEN);
             }
         }
 

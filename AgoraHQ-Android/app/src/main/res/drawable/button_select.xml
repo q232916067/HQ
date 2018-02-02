@@ -5,20 +5,19 @@
 
     <!--<item android:state_pressed="false" android:drawable="@drawable/gray">-->
     <item android:state_pressed="false">
-        <shape
-            android:shape="rectangle">
-            <solid android:color="#aaaa"></solid>
-            <corners android:radius="4dp"/>
-        </shape>
+
+
+            <solid android:color="#16afFD"></solid>
+            <corners android:radius="8dp"/>
+
 
     </item>
     <!--<item android:state_pressed="true" android:drawable="@drawable/white">-->
     <item android:state_pressed="true">
-        <shape
-            android:shape="rectangle">
-            <solid android:color="#ffff"></solid>
-            <corners android:radius="4dp"/>
-        </shape>
+
+            <solid android:color="#1695FD"></solid>
+            <corners android:radius="8dp"/>
+
     </item>
 
 </selector>

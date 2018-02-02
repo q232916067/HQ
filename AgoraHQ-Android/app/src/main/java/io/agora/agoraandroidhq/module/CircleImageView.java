@@ -72,14 +72,14 @@ public class CircleImageView extends ImageView {
             path.close();
         }
         cns.drawCircle(w / 2.0f, h / 2.0f, Math.min(w / 2.0f, h / 2.0f) + 1.5f, paint);
-        int saveCount = cns.getSaveCount();
+       // int saveCount = cns.getSaveCount();
         cns.save();
         cns.setDrawFilter(mPaintFlagsDrawFilter);
         cns.clipPath(path, Region.Op.REPLACE);
         cns.setDrawFilter(mPaintFlagsDrawFilter);
         cns.drawColor(Color.WHITE);
         super.onDraw(cns);
-        cns.restoreToCount(saveCount);
+       // cns.restoreToCount(saveCount);
     }
 
 }

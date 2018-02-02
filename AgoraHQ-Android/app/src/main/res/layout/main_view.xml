@@ -1,147 +1,226 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout android:layout_width="match_parent"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#419aff"
-    android:orientation="vertical"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+    android:background="#0543BF"
+    android:orientation="vertical">
+    <!--
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="35dp"
+            android:orientation="horizontal">-->
+    <ImageButton
+        android:id="@+id/image_question"
+        android:layout_width="15dp"
+        android:layout_height="20dp"
+        android:layout_gravity="right"
+        android:layout_marginRight="15dp"
+        android:background="@drawable/question_image"
+        android:clickable="true"
+        android:onClick="questionImageClick"
+        android:scaleType="fitXY"
+        android:layout_marginTop="35dp"/>
 
-    <FrameLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="35dp"
-
+        android:layout_marginTop="3dp"
+        android:gravity="center_horizontal"
         android:orientation="horizontal">
+
+
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:scaleType="fitCenter"
+            android:src="@drawable/title_icon" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="@string/app_title"
-            android:textColor="#ffff"
+            android:layout_marginLeft="15dp"
             android:gravity="center_horizontal"
-            android:textSize="32sp"
-            android:textStyle="bold" />
+            android:text="@string/game_title"
+            android:textColor="#ffff"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            android:typeface="monospace" />
 
-        <ImageButton
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:layout_gravity="right"
-            android:layout_marginRight="20dp"
-            android:id="@+id/image_question"
-            android:clickable="true"
-            android:scaleType="fitCenter"
-            android:onClick="questionImageClick"
-            android:background="@drawable/home_tutorial" />
-    </FrameLayout>
+
+    </LinearLayout>
+
+
+    <!--</FrameLayout>-->
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
         android:layout_marginTop="20dp"
         android:text="@string/next_game_time"
-        android:textSize="25sp"
         android:textColor="#fff"
-        android:layout_gravity="center_horizontal"/>
+        android:textSize="15sp" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_horizontal"
         android:orientation="horizontal">
-        <TextView
-            android:textSize="25sp"
-            android:layout_marginTop="15dp"
-            android:textColor="#fff"
-            android:layout_width="wrap_content"
-            android:textStyle="bold"
 
+        <TextView
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/the_day_and_the_money"/>
+
+            android:layout_marginTop="10dp"
+            android:text="@string/the_day_and_the_money"
+            android:textColor="#fff"
+
+
+            android:textSize="20sp"
+            android:textStyle="bold" />
 
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:orientation="horizontal"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
         android:gravity="center"
-        android:layout_height="wrap_content">
+        android:orientation="horizontal">
 
         <EditText
-            android:layout_width="150dp"
-            android:layout_height="wrap_content"
-            android:hint="Channel Name"
+            android:id="@+id/channel_name_editText"
+            android:layout_width="160dp"
+            android:layout_height="40dp"
             android:layout_gravity="bottom"
-            android:textSize="18sp"
-            android:id="@+id/channel_name_editText"/>
+            android:background="@drawable/channel_name_edittext"
+            android:hint="Channel Name"
+            android:textColor="@color/black"
+            android:textColorHint="@color/gray"
+            android:textSize="18sp" />
 
         <Button
+            android:id="@+id/btnStartPlayGame"
             android:layout_width="120dp"
-            android:layout_height="50dp"
+            android:layout_height="40dp"
+            android:layout_gravity="bottom"
+            android:layout_marginLeft="15dp"
             android:layout_marginTop="20dp"
-            android:text="@string/start_play_game"
+            android:background="@drawable/start_game"
             android:gravity="center"
-            android:textStyle="bold"
+            android:onClick="startClick"
+            android:text="@string/start_play_game"
             android:textColor="#de3"
             android:textSize="20sp"
-            android:id="@+id/btnStartPlayGame"
-            android:onClick="startClick"
-            android:alpha="0.4"
-            android:background="@drawable/button_select"/>
+            android:textStyle="bold"
+
+            android:typeface="monospace" />
 
     </LinearLayout>
 
     <LinearLayout
-        android:layout_width="350dp"
-        android:layout_marginTop="25dp"
-        android:layout_height="350dp"
-        android:layout_gravity="center_horizontal"
-        android:background="#fff">
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-
-            android:layout_marginTop="30dp"
+            android:layout_height="0dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginLeft="30dp"
+            android:layout_marginRight="30dp"
+            android:layout_marginTop="0dp"
+            android:layout_weight="6"
+            android:background="@drawable/icon_and_name"
             android:orientation="vertical">
 
-
-            <io.agora.agoraandroidhq.module.CircleImageView
-                android:layout_width="70dp"
-                android:layout_height="70dp"
-                android:scaleType="fitCenter"
-                android:layout_gravity="center_horizontal"
-                android:id="@+id/user_image"
-
-                android:src="@drawable/user_main"
-                android:onClick="userImage"/>
-
-          <!--  <TextView
-                android:layout_width="80dp"
-                android:layout_height="50dp"
-                android:gravity="center_horizontal"
-                android:textColor="#000"
-                android:textSize="20sp"
-                android:textStyle="bold"
-
-                android:layout_marginTop="30dp"
-                android:id="@+id/user_labl"
-                android:text="Label"/>-->
-
-            <EditText
-                android:layout_marginTop="25dp"
-                android:id="@+id/user_label"
-                android:text="Label"
-                android:layout_width="80dp"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:gravity="center"
-                android:textColor="#000"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:background="@null"
-                android:enabled="true"/>
+
+                android:layout_marginTop="20dp"
+                android:orientation="vertical">
 
 
+                <io.agora.agoraandroidhq.module.CircleImageView
+                    android:id="@+id/user_image"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:layout_gravity="center_horizontal"
+                    android:onClick="userImage"
+
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/user_main" />
+
+                <!--  <TextView
+                      android:layout_width="80dp"
+                      android:layout_height="50dp"
+                      android:gravity="center_horizontal"
+                      android:textColor="#000"
+                      android:textSize="20sp"
+                      android:textStyle="bold"
+
+                      android:layout_marginTop="30dp"
+                      android:id="@+id/user_labl"
+                      android:text="Label"/>-->
+
+                <EditText
+                    android:id="@+id/user_label"
+                    android:layout_width="250dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="15dp"
+                    android:background="@null"
+                    android:enabled="true"
+                    android:gravity="center"
+                    android:text="Label"
+                    android:textColor="#000"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginBottom="26dp"
+                android:layout_marginLeft="9dp"
+                android:layout_marginRight="7.5dp"
+                android:scaleType="fitXY"
+                android:src="@drawable/main_show_money" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginLeft="33dp"
+            android:layout_marginRight="33dp"
+            android:layout_weight="1"
+            android:gravity="center_horizontal"
+            android:orientation="horizontal">
+
+            <Button
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="10dp"
+                android:layout_weight="1"
+                android:alpha="0.5"
+                android:background="@drawable/main_invisit_and_rank"
+                android:text="@string/ranking_list" />
+
+            <Button
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:layout_weight="1"
+                android:alpha="0.5"
+                android:background="@drawable/main_invisit_and_rank"
+                android:text="@string/text_invite_friends" />
         </LinearLayout>
     </LinearLayout>
 

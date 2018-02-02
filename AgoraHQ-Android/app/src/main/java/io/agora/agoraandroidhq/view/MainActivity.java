@@ -39,6 +39,7 @@ import android.widget.Toast;
 import org.w3c.dom.Text;
 
 import io.agora.agoraandroidhq.R;
+import io.agora.agoraandroidhq.tools.Constants;
 import io.agora.agoraandroidhq.tools.GameControl;
 import io.agora.agoraandroidhq.tools.SharedPreferenceHelper;
 
@@ -62,6 +63,7 @@ public class MainActivity extends Activity {
         super.onResume();
         playGame.setClickable(true);
         sharedPreferenceHelper = getSharedPreference();
+        initConstantsHttp();
     }
 
 
@@ -93,6 +95,16 @@ public class MainActivity extends Activity {
 
     }
 
+    private void initConstantsHttp() {
+        //Can not change this
+        Constants.HTTP_RELIVE = getResources().getString(R.string.http_relive);
+        Constants.HTTP_SEND_ANSWER_TO_SERVER = getResources().getString(R.string.http_send_answer_to_server);
+        Constants.HTTP_CHECK_WHEATHER_CAN_PLAY = getResources().getString(R.string.http_check_wheather_can_play);
+
+        GameControl.logD("Http_relive = "+Constants.HTTP_RELIVE);
+        GameControl.logD("Http_send_answer = "+Constants.HTTP_SEND_ANSWER_TO_SERVER);
+        GameControl.logD("Http_Check_Wheather_can_paly = " +Constants.HTTP_CHECK_WHEATHER_CAN_PLAY );
+    }
 
     private String getNameFromSharedPreference() {
         GameControl.logD("getNameFromSharedPreference");
@@ -224,12 +236,12 @@ public class MainActivity extends Activity {
             }
         } else if (requestCode == 0) {
 
-            if(grantResults[0]==PackageManager.PERMISSION_GRANTED) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 Intent intent = new Intent(Intent.ACTION_PICK,
                         android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                 startActivityForResult(intent, IMAGE);
-            }else {
-                Toast.makeText(MainActivity.this, R.string.text_do_not_have_permission,Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(MainActivity.this, R.string.text_do_not_have_permission, Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -289,7 +301,7 @@ public class MainActivity extends Activity {
 
                 //GameControl.logD("bitmapSIze =  " + bitmap.getByteCount());
 
-                Bitmap bitmaps = resizeBitmap(imagePath, 200, 200);
+                Bitmap bitmaps = resizeBitmap(imagePath, 80, 80);
 
 
                 if (bitmaps != null) {
@@ -341,7 +353,9 @@ public class MainActivity extends Activity {
         // 产生缩放后的Bitmap对象
         Bitmap resizeBitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmapWidth, bitmapHeight, matrix, false);
         // save file
-
+        bitmap.recycle();
+        bitmap = null;
+        matrix = null;
         GameControl.logD("bitmapSIze =  after" + resizeBitmap.getByteCount());
         return resizeBitmap;
     }
