@@ -41,6 +41,9 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import io.agora.agoraandroidhq.R;
 import io.agora.agoraandroidhq.control.AgoraSignal;
@@ -116,6 +119,18 @@ public class GameActivity extends Activity {
 
 
         checkSelfPermissions();
+
+        executorService = createExcetorService();
+
+    }
+
+    private ExecutorService executorService;
+
+    private ExecutorService createExcetorService(){
+
+        ExecutorService executorService = Executors.newCachedThreadPool();
+
+        return executorService;
     }
 
     private String getAccount() {
@@ -358,32 +373,30 @@ public class GameActivity extends Activity {
 
 
     private void startCheckWheatherCanPlay() {
-        new Thread() {
-            @Override
-            public void run() {
-                super.run();
 
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                GameControl.logD("startCheckWheatherCanPalyThread");
-
-                try {
-                    if (isFirst) {
-                        checkWheatherCanPlay();
-
-                        isFirst = false;
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
+       executorService.execute(new Runnable() {
+           @Override
+           public void run() {
 
 
-            }
+               try {
+                   Thread.sleep(1000);
+               } catch (InterruptedException e) {
+                   e.printStackTrace();
+               }
+               GameControl.logD("startCheckWheatherCanPalyThread");
 
-        }.start();
+               try {
+                   if (isFirst) {
+                       checkWheatherCanPlay();
+
+                       isFirst = false;
+                   }
+               } catch (JSONException e) {
+                   e.printStackTrace();
+               }
+           }
+       });
     }
 
 
@@ -695,6 +708,7 @@ public class GameActivity extends Activity {
                     break;
 
                 case 2:
+                    break;
             }
         }
 
@@ -706,7 +720,8 @@ public class GameActivity extends Activity {
 
     private void showQuestion() {
 
-        new Thread() {
+
+        executorService.execute(new Runnable() {
             @Override
             public void run() {
                 questionTime = GameControl.timeOut;
@@ -729,7 +744,8 @@ public class GameActivity extends Activity {
                     }
                 }
             }
-        }.start();
+        });
+
 
 
         logD("  runOnUiThread   ");
@@ -1144,7 +1160,7 @@ public class GameActivity extends Activity {
 
         // View view = game_layout.findViewById(R.id.question_layout);
         CheckBox box = new CheckBox(GameActivity.this);
-        GameControl.logD("text  = " + text);
+        //GameControl.logD("text  = " + text);
         ViewGroup.MarginLayoutParams layoutParams = new ViewGroup.MarginLayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         layoutParams.setMargins(0, 15, 0, 15);
         box.setText(text);
@@ -1180,27 +1196,27 @@ public class GameActivity extends Activity {
         }*/
 
         for (int i = 0; i < question_count; i++) {
-            GameControl.logD("childTag = " + question_layout.getChildAt(i).getTag() + "");
+           // GameControl.logD("childTag = " + question_layout.getChildAt(i).getTag() + "");
 
             View view = question_layout.getChildAt(i);
             String tag = view.getTag() + "";
 
-            GameControl.logD("childTag = " + question_layout.getChildAt(i).getTag() + "");
+            //GameControl.logD("childTag = " + question_layout.getChildAt(i).getTag() + "");
 
             if (tag.equals(positions + "")) {
-                GameControl.logD("correctChild  =  setBackGround");
+               // GameControl.logD("correctChild  =  setBackGround");
                 view.setBackgroundColor(Color.GREEN);
             }
         }
 
 
-        View view = (View) question_layout.getTag(positions);
+       /* View view = (View) question_layout.getTag(positions);
 
         if (view != null) {
             GameControl.logD("view is not null");
         } else {
             GameControl.logD("view is null");
-        }
+        }*/
     }
 
 

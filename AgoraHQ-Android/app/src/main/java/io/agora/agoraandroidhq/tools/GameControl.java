@@ -18,6 +18,7 @@ public class GameControl {
 
     public static Question currentQuestion;
 
+    public static final boolean SHOW_LOG = false;
 
     public static boolean controlCheckThread = true;
 
@@ -36,7 +37,10 @@ public class GameControl {
     }
 
     public static void logD(String message) {
-        Log.d("agora_signal", message);
+
+        if(SHOW_LOG) {
+            Log.d("agora_signal", message);
+        }
     }
 
     public static int timeOut = 10;
