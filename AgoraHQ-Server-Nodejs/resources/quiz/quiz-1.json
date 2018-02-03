@@ -1,56 +1,141 @@
 [{
-    "id": 0,
-    "question": "下面哪一种烫衣服的方法是不正确的？",
+    "question": "In the year 1900 in the U.S. what were the most popular first names given to boy and girl babies?",
     "type": "multi",
     "options": [
-        "熨之前在衣服上喷一些水",
-        "尽可能长时间的熨",
-        "掌握合适的温度",
-        "在衣服和熨斗之间垫一块湿布"
-    ],
-    "answer": 1
-},{
-    "id": 1,
-    "question": "世界上最大的宫殿是",
-    "type": "multi",
-    "options": [
-        "故宫",
-        "白宫",
-        "爱丽舍宫",
-        "克里姆林宫"
-    ],
-    "answer": 0
-},{
-    "id": 2,
-    "question": "古代的“侍从”、“书童”和“仆人”起到了现代导游服务中的（　）角色。",
-    "type": "multi",
-    "options": [
-        "全程陪同",
-        "领队",
-        "景点讲解员",
-        "地方陪同"
-    ],
-    "answer": 0
-},{
-    "id": 3,
-    "question": "导游人员在讲解西湖旖旎的自然风光时，穿插介绍许仙和白娘子“千年等一回”的传说故事。这种导游讲解技巧是（　）。",
-    "type": "multi",
-    "options": [
-        "突出重点法",
-        "触景生情法",
-        "虚实结合法",
-        "制造悬念法"
+        "William and Elizabeth",
+        "Joseph and Catherine",
+        "John and Mary",
+        "George and Anne"
     ],
     "answer": 2
 },{
-    "id": 4,
-    "question": "下列旅游事故中，属重大故障的是",
+    "question": "When did the Liberty Bell get its name?",
     "type": "multi",
     "options": [
-        "游客走失",
-        "集体食物中毒",
-        "丢失钱物",
-        "一般车祸"
+        "when it was made, in 1701",
+        "when it rang on July 4, 1776",
+        "in the 19th century, when it became a symbol of the abolition of slavery",
+        "none of the above"
+    ],
+    "answer": 2
+},{
+    "question": "In the Roy Rogers -Dale Evans Museum, you will find Roy and Dales stuffed horses. Roy's horse was named Trigger, which was Dales horse?",
+    "type": "multi",
+    "options": [
+        "Buttermilk",
+        "Daisy",
+        "Scout",
+        "Tulip"
+    ],
+    "answer": 0
+},{
+    "question": "The Daniel Boon museum at the home where he died can best be described how?",
+    "type": "multi",
+    "options": [
+        "a log cabin in Kentucky",
+        "a two-story clapboard house in Tennessee",
+        "a four-story Georgian-style home in Missouri",
+        "a three story brick house in Arkansas"
+    ],
+    "answer": 2
+},{
+    "question": "Which of the following items was owned by the fewest U.S. homes in 1990?",
+    "type": "multi",
+    "options": [
+        "when it was made, in 1701",
+        "when it rang on July 4, 1776",
+        "in the 19th century, when it became a symbol of the abolition of slavery",
+        "none of the above"
     ],
     "answer": 1
+},{
+    "question": "Who holds the record for the most victories in a row on the professional golf tour?",
+    "type": "multi",
+    "options": [
+        "Jack Nicklaus",
+        "Arnold Palmer",
+        "Byron Nelson",
+        "Ben Hogan"
+    ],
+    "answer": 2
+},{
+    "question": "Who is third behind Hank Aaron and Babe Ruth in major league career home runs?",
+    "type": "multi",
+    "options": [
+        "Reggie Jackson",
+        "Harmon Killebrew",
+        "Willie Mays",
+        "Frank Robinson"
+    ],
+    "answer": 2
+},{
+    "question": "In 1990, in what percentage of U.S. married couples did the wife earn more money than the husband?",
+    "type": "multi",
+    "options": [
+        "8",
+        "18",
+        "38",
+        "58"
+    ],
+    "answer": 1
+},{
+    "question": "During the 1980s for six consecutive years what breed of dog was the most popular in the U.S.?",
+    "type": "multi",
+    "options": [
+        "cocker spaniel",
+        "German shepherd",
+        "Labrador retriever",
+        "poodle."
+    ],
+    "answer": 0
+},{
+    "question": "In 1985, five percent of U.S. households had telephone answering machines. By 1990 what percentage of homes had answering machines?",
+    "type": "multi",
+    "options": [
+        "10 percent",
+        "15 percent",
+        "31 percent",
+        "51 percent"
+    ],
+    "answer": 2
+},{
+    "question": "The first black American pictured on a U.S. postage stamp was who?",
+    "type": "multi",
+    "options": [
+        "Frederick Douglass",
+        "Booker T. Washington",
+        "Louis Armstrong",
+        "Joe Louis"
+    ],
+    "answer": 3
+},{
+    "question": "What did the \"D\" in \"D-Day\" stand for?",
+    "type": "multi",
+    "options": [
+        "doom",
+        "day",
+        "Dwight (Eisenhower)",
+        "Dunkirk"
+    ],
+    "answer": 1
+},{
+    "question": "The Brownie Box Camera introduced by Eastman Kodak in 1900 had a retail price of what?",
+    "type": "multi",
+    "options": [
+        "$1",
+        "$5",
+        "$10",
+        "$20"
+    ],
+    "answer": 0
+},{
+    "question": "Which of these characters turned 40 years old in 1990?",
+    "type": "multi",
+    "options": [
+        "Charlie Brown",
+        "Bugs Bunny",
+        "Mickey Mouse",
+        "Fred Flintstone"
+    ],
+    "answer": 0
 }]

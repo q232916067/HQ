@@ -24,7 +24,7 @@ public class JsonToString {
 
     public synchronized static Object jsonToString(String jsonData) throws JSONException {
         JSONObject jsonObject = new JSONObject(jsonData);
-
+        GameControl.logD("jsonToString");
         strinType = jsonObject.getString("type");
 
         switch (strinType) {
@@ -54,15 +54,18 @@ public class JsonToString {
                 int id = dataObjects.getInt("id");
                 String question = dataObjects.getString("question");
                 String type = dataObjects.getString("type");
-                JSONArray array = dataObjects.getJSONArray("options");
+                int total_question = dataObjects.getInt("total");
+                int timeOut = dataObjects.getInt("timeout");
 
+                JSONArray array = dataObjects.getJSONArray("options");
+                GameControl.logD("jsonToString  =  id=" + id + " ");
                 ArrayList list = new ArrayList();
                 for (int i = 0; i < array.length(); i++) {
                     list.add(array.get(i));
                 }
 
-                returnObject = new Question(id, question, type, list);
-
+                returnObject = new Question(id, question, type, list, total_question, timeOut);
+                //  returnObject = new Question(id, question, type, list);
                 break;
 
         }
@@ -84,14 +87,15 @@ public class JsonToString {
         stringBuilder.append("\\\"data\\\":").append("\\\"").append(message).append("\\\"").append(",");
         stringBuilder.append("\\\"name\\\":").append("\\\"").append(GameControl.currentUser.getName()).append("\\\"");
         stringBuilder.append("}");
-        GameControl.logD("sendString  =  "+stringBuilder.toString());
+        GameControl.logD("sendString  =  " + stringBuilder.toString());
 
         try {
-            return new String(stringBuilder.toString().getBytes("GBK"));
+            return new String(stringBuilder.toString().getBytes("UTF-8"));
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
             return null;
         }
+        // return stringBuilder.toString();
     }
 
     public static String sendMessageSelf(String message) throws JSONException {
@@ -115,7 +119,7 @@ public class JsonToString {
             return null;
         }*/
 
-        return  jsonObject.toString();
+        return jsonObject.toString();
     }
 
 }

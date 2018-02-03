@@ -1,5 +1,7 @@
 package io.agora.agoraandroidhq.tools;
 
+import io.agora.agoraandroidhq.R;
+
 /**
  * Created by zhangtao on 2018/1/12.
  */
@@ -10,11 +12,17 @@ public class Constants {
     //public static  final String HTTP_GET_TOKEN ="http://10.60.2.75:8000/v1/token";
     public static  final String HTTP_GET_TOKEN = "http://123.155.153.87:8000/v1/token";
     //url to send answer to server
-    public static final String HTTP_SEND_ANSWER_TO_SERVER = "http://123.155.153.87:9000/v1/answer";
+
     //url wheather can play
-    public static final String HTTP_WHEATHER_CAN_PLAY = "http://123.155.153.87:9000/v1/canplay";
+    //public static final String HTTP_WHEATHER_CAN_PLAY = "http://123.155.153.87:9000/v1/canplay";
     //url to relive
-    public static final String HTTP_RELIVE = "http://123.155.153.87:9000/v1/relive";
+   /* public static final String HTTP_RELIVE = "http://123.155.153.87:9000/v1/relive";
+    public static final String HTTP_SEND_ANSWER_TO_SERVER = "http://123.155.153.87:9000/v1/answer";
+*/
+
+    public static  String HTTP_RELIVE;
+    public static  String HTTP_SEND_ANSWER_TO_SERVER;
+    public static  String HTTP_CHECK_WHEATHER_CAN_PLAY;
 
     //rong cloud
 
@@ -39,7 +47,7 @@ public class Constants {
     public static final int MESSAGE_TOAST = 10;
 
 
-    public static final String AGORA_APP_ID = #APPID;
+    public static final String AGORA_APP_ID = #YOUR_APPID;
     public static final int LOGIN_AGORA_SIGNAL_SUCCESS = 100;
     public static final int LOGIN_AGORA_SIGNAL_FAIL = 101;
     public static final int AGORA_SIGNAL_RECEIVE = 102;

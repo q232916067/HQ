@@ -3,13 +3,8 @@
     android:id="@+id/game_view_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#419aff">
+    android:background="@drawable/game_background">
 
-    <ImageView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@drawable/background"
-        android:scaleType="fitXY"/>
 
     <FrameLayout
         android:id="@+id/live_view"
@@ -97,32 +92,50 @@
     </RelativeLayout>
 
     <LinearLayout
-        android:layout_width="350dp"
+        android:layout_width="340dp"
         android:id="@+id/game_layout"
         android:layout_height="wrap_content"
         android:orientation="vertical"
 
-        android:layout_marginTop="40dp"
-        android:background="#aaa"
+        android:layout_marginTop="30dp"
+        android:background="@drawable/question_layout"
         android:layout_gravity="center_horizontal">
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="20sp"
-            android:textColor="@color/red"
-            android:text="10 s"
-            android:gravity="center_horizontal"
-            android:id="@+id/time_reduce"/>
+      <FrameLayout
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content">
+
+          <TextView
+              android:layout_marginTop="20dp"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:textSize="20sp"
+              android:textColor="@color/red"
+              android:gravity="center_horizontal"
+              android:typeface="monospace"
+              android:id="@+id/time_reduce"/>
+
+          <ImageView
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_gravity="right"
+              android:layout_marginTop="10dp"
+              android:layout_marginRight="10dp"
+              android:scaleType="fitXY"
+              android:src="@drawable/question_agora_title"/>
+
+
+      </FrameLayout>
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:id="@+id/game_title"
+            android:textColor="@color/black"
             android:text="title"
-            android:layout_gravity="center_horizontal"
             android:gravity="center"/>
         <TextView
+            android:layout_marginTop="10dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_horizontal"
@@ -132,14 +145,32 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/question_layout"
+            android:layout_marginTop="15dp"
             android:orientation="vertical"></LinearLayout>
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="20dp"></LinearLayout>
         <Button
+
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/submit_string"
+            android:textStyle="bold"
+            android:textColor="@color/black"
+            android:background="@drawable/submit_btn"
             android:id="@+id/submit_button"/>
     </LinearLayout>
+
+
+    <ImageView
+        android:layout_width="300dp"
+        android:id="@+id/game_result"
+        android:layout_height="400dp"
+        android:orientation="vertical"
+        android:layout_marginTop="80dp"
+        android:visibility="gone"
+        android:layout_gravity="center_horizontal" />
 
    <!-- <Button
         android:layout_width="200dp"

@@ -8,6 +8,7 @@ import android.util.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
@@ -31,7 +32,7 @@ public class AgoraHQSigSDK {
 
     public static final String LOG_TAG = "AgoraHQSigSDK";
 
-    private Context mCtx;
+    private WeakReference<Context> mCtx;
     private String mAppId;
     private AgoraAPIOnlySignal mAgoraSigSDK;
     private EventHandler mEventHandler;
@@ -66,7 +67,7 @@ public class AgoraHQSigSDK {
     private volatile AgoraHQSigLoginStatus mLoginStatus;
 
     public AgoraHQSigSDK(Context context, String appId) {
-        this.mCtx = context;
+        this.mCtx = new WeakReference<>(context);
         this.mAppId = appId;
         mAgoraSigSDK = AgoraAPIOnlySignal.getInstance(context, appId);
        // mAgoraSigSDK.dbg("lbs_100", "1");
@@ -432,7 +433,7 @@ public class AgoraHQSigSDK {
             }
         });
 
-        initRCIfPossible(mCtx, mAppId, new Internal3rdDataHandler() {
+        initRCIfPossible(mCtx.get(), mAppId, new Internal3rdDataHandler() {
             @Override
             public void onRCReady(String appId) {
                 getTokenAndLoginRC();
@@ -668,7 +669,7 @@ public class AgoraHQSigSDK {
 
         postStatistics();
         stopStatisticsTimer();
-        statisticsItem = null;
+        // statisticsItem = null;
 
         mRcAppId = null;
 
@@ -693,8 +694,11 @@ public class AgoraHQSigSDK {
                 }
 
                 String json = statisticsItem.convertToJson();
+                if(statisticsItem != null) {
+                    statisticsItem.clear();
+                }
                 new HttpUrlUtils().execHttpSyncTask(Constants.URL_POST_STATISTICS_, true, null, json);
-                statisticsItem.clear();
+
             }
         }, 0, 30000);
     }
