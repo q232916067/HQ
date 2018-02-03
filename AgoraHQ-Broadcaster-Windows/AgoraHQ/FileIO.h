@@ -94,6 +94,7 @@ protected:
 #define INI_LoginInfo_CameraDeviceId						"CameraDeviceID"
 #define INI_LoginInfo_CameraDeviceName				"CameraDeviceName"
 #define INI_LoginInfo_SignalAccount								"SignalAccount"
+#define INI_LoginInfo_ServerAccount								"ServerAccount"
 #define INI_LoginInfo_Language									"Language"
 
 #define INI_DeviceInfoFront												"DeviceInfoFront"
@@ -145,6 +146,7 @@ public:
 	__DECLARE_INICONFIG_FUN(CameraDeviceID)
 	__DECLARE_INICONFIG_FUN(CameraDeviceName)
 	__DECLARE_INICONFIG_FUN(SignalAccount)
+	__DECLARE_INICONFIG_FUN(ServerAccount)
 	__DECLARE_INICONFIG_FUN(Language)
 
 	__DECLARE_INICONFIG_SIMILAR_FUN(ProcessEnable)

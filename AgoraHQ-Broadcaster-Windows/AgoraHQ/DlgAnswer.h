@@ -34,6 +34,7 @@ protected:
 	afx_msg void OnBnClickedButtonStartMark();
 	afx_msg void OnBnClickedButtonStopanswer();
 	afx_msg void OnBnClickedButtonSetbonuses();
+	afx_msg void OnBnClickedButtonReset();
 
 	HRESULT onLoginSuccess(WPARAM wParam, LPARAM lParam);
 	HRESULT onLogout(WPARAM wParam, LPARAM lParam);
@@ -91,6 +92,4 @@ private:
 	CDlgAnswerResultStatics m_DlgResult;
 	int m_nQuestionId;
 	CAGEngineEventHandler* m_pAgEngineEventHandle;
-public:
-	afx_msg void OnBnClickedButtonReset();
 };

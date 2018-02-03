@@ -80,7 +80,11 @@ BOOL CDlgAnswer::OnInitDialog()
 void CDlgAnswer::initCtrl()
 {
 	m_account = gHQConfig.getSignalAccount();
-	m_serverAccount = "agora_hq_cc_server";
+	m_serverAccount = gHQConfig.getServerAccount();
+	if ("" == m_serverAccount){
+		m_serverAccount = "agora_hq_cc_server_en";
+		gHQConfig.setServerAccount(m_serverAccount);
+	}
 
 	m_btnUpdateQuestion.EnableWindow(FALSE);
 	m_btnStartAnswer.EnableWindow(FALSE);

@@ -38,6 +38,7 @@ void CDlgConfig::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_BUTTON_VIDEOTEST, m_btnSatrtPreview);
 	DDX_Control(pDX, IDC_STATIC_VIDEOTEST, m_trlTestVideo);
 	DDX_Control(pDX, IDC_COMBO_LANGUAGE, m_comLanguage);
+	DDX_Control(pDX, IDC_COMBO_ServerAccount, m_comServerAccount);
 }
 
 
@@ -93,6 +94,8 @@ void CDlgConfig::OnBnClickedButtonConfigSave()
 	gHQConfig.setChannelName(cs2s(strParam));
 	int nLanguage = m_comLanguage.GetCurSel();
 	gHQConfig.setLanguage(int2str(nLanguage));
+	m_comServerAccount.GetWindowTextW(strParam);
+	gHQConfig.setServerAccount(cs2s(strParam));
 	
 	int nCurSel = m_comCamera.GetCurSel();
 	CAgoraCameraManager CameraManager;
@@ -226,6 +229,15 @@ void CDlgConfig::initCtrl()
 	}
 	gHQConfig.setLanguage(curLanguage);
 	m_comLanguage.SetCurSel(str2int(curLanguage));
+
+	m_comServerAccount.AddString(_T("agora_hq_cc_server_en"));
+	m_comServerAccount.AddString(_T("agora_hq_cc_server"));
+	std::string curServerAccount = gHQConfig.getServerAccount();
+	int nCurSel = m_comServerAccount.FindStringExact(0, s2cs(curServerAccount));
+	if (CB_ERR == nCurSel && "" != curServerAccount){
+		nCurSel = m_comServerAccount.AddString(s2cs(curServerAccount));
+	}
+	m_comServerAccount.SetCurSel(nCurSel);
 
 	std::string strVideoIndex = gHQConfig.getVideoSolutinIndex();
 	if ("" == strVideoIndex)

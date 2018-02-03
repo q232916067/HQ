@@ -38,6 +38,7 @@ private:
 	CEdit m_edChannelName;
 	CEdit m_edLanguage;
 	CComboBox m_comLanguage;
+	CComboBox m_comServerAccount;
 
 	CButton m_btnSatrtPreview;
 	CButton m_btnAppcertificateEnable;
