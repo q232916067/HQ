@@ -30,6 +30,9 @@
     <string name="http_relive">http://123.155.153.87:9000/v1/relive</string>
     <string name="http_send_answer_to_server">http://123.155.153.87:9000/v1/answer</string>
     <string name="http_check_wheather_can_play">http://123.155.153.87:8000/v1/canplay?gid=</string>
+    <string name="string_money_300">¥300</string>
+    <string name="string_money_120">¥120</string>
+    <string name="string_get_more">获取更多</string>
 
     <drawable name="button_press">#8888</drawable>
 </resources>

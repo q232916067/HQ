@@ -126,7 +126,7 @@ public class GameActivity extends Activity {
 
     private ExecutorService executorService;
 
-    private ExecutorService createExcetorService(){
+    private ExecutorService createExcetorService() {
 
         ExecutorService executorService = Executors.newCachedThreadPool();
 
@@ -296,7 +296,7 @@ public class GameActivity extends Activity {
 
                                 if (timeOut != 0) {
                                     GameControl.timeOut = timeOut;
-                                    time_reduce.setText(timeOut+" s");
+                                    time_reduce.setText(timeOut + " s");
                                 }
                             }
 
@@ -374,29 +374,29 @@ public class GameActivity extends Activity {
 
     private void startCheckWheatherCanPlay() {
 
-       executorService.execute(new Runnable() {
-           @Override
-           public void run() {
+        executorService.execute(new Runnable() {
+            @Override
+            public void run() {
 
 
-               try {
-                   Thread.sleep(1000);
-               } catch (InterruptedException e) {
-                   e.printStackTrace();
-               }
-               GameControl.logD("startCheckWheatherCanPalyThread");
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                GameControl.logD("startCheckWheatherCanPalyThread");
 
-               try {
-                   if (isFirst) {
-                       checkWheatherCanPlay();
+                try {
+                    if (isFirst) {
+                        checkWheatherCanPlay();
 
-                       isFirst = false;
-                   }
-               } catch (JSONException e) {
-                   e.printStackTrace();
-               }
-           }
-       });
+                        isFirst = false;
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
 
@@ -653,9 +653,10 @@ public class GameActivity extends Activity {
                         if (GameControl.currentQuestion != null) {
                             logD("sei   = " + sid + "   questionId  =  " + GameControl.currentQuestion.getId());
 
-                            if (sid == GameControl.currentQuestion.getId()) {
+                            if (sid == GameControl.currentQuestion.getId() && isFirstTimeSEI) {
                                 logD("sei  show");
                                 showQuestion();
+                                isFirstTimeSEI = false;
                             }
                         }
                     }
@@ -664,6 +665,7 @@ public class GameActivity extends Activity {
         }
     };
 
+    private boolean isFirstTimeSEI = true;
 
     private boolean questionFlag = true;
     private Handler questionTimeHandler = new Handler() {
@@ -704,6 +706,8 @@ public class GameActivity extends Activity {
                         game_layout.setVisibility(View.GONE);
                         time_reduce.setTextColor(Color.RED);
                         time_reduce.setText(GameControl.timeOut + " s");
+                        questionFlag = true;
+                        isFirstTimeSEI = true;
                     }
                     break;
 
@@ -726,7 +730,10 @@ public class GameActivity extends Activity {
             public void run() {
                 questionTime = GameControl.timeOut;
 
+
+                GameControl.logD("showQuestion questionFlag = " + questionFlag);
                 while (questionFlag) {
+
                     try {
                         Thread.sleep(1000);
                     } catch (InterruptedException e) {
@@ -747,9 +754,8 @@ public class GameActivity extends Activity {
         });
 
 
-
         logD("  runOnUiThread   ");
-        questionFlag = true;
+        //questionFlag = true;
         GameActivity.this.runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -1028,7 +1034,7 @@ public class GameActivity extends Activity {
 
         //  Toast.makeText(GameActivity.this, builder.toString(), Toast.LENGTH_SHORT).show();
 
-        GameControl.logD("submit answer  url = "+Constants.HTTP_SEND_ANSWER_TO_SERVER);
+        GameControl.logD("submit answer  url = " + Constants.HTTP_SEND_ANSWER_TO_SERVER);
         try {
             AgoraSignal.sendAnswerToserver(GameControl.currentQuestion.getId(), a, new HttpUrlUtils.OnResponse() {
                 @Override
@@ -1196,7 +1202,7 @@ public class GameActivity extends Activity {
         }*/
 
         for (int i = 0; i < question_count; i++) {
-           // GameControl.logD("childTag = " + question_layout.getChildAt(i).getTag() + "");
+            // GameControl.logD("childTag = " + question_layout.getChildAt(i).getTag() + "");
 
             View view = question_layout.getChildAt(i);
             String tag = view.getTag() + "";
@@ -1204,7 +1210,7 @@ public class GameActivity extends Activity {
             //GameControl.logD("childTag = " + question_layout.getChildAt(i).getTag() + "");
 
             if (tag.equals(positions + "")) {
-               // GameControl.logD("correctChild  =  setBackGround");
+                // GameControl.logD("correctChild  =  setBackGround");
                 view.setBackgroundColor(Color.GREEN);
             }
         }

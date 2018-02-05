@@ -4,7 +4,7 @@
     <string name="net_error">Net error</string>
     <string name="error_to_resolve_token">Error to resolve token</string>
     <string name="next_game_time">Next Game Time</string>
-    <string name="the_day_and_the_money">Today 13:00 | $50000 Money</string>
+    <string name="the_day_and_the_money">Today 13:00 | $250 Bonus</string>
     <string name="start_play_game">start</string>
     <string name="answer_error_message">Wrong</string>
     <string name="answer_correct_message">Bingo</string>
@@ -26,10 +26,14 @@
     <string name="app_title">Agora Trivia</string>
     <string name="text_channel_name_can_not_be_null">Channel Name can not be null</string>
     <string name="game_title">Agora Trivia</string>
-    <string name="ranking_list">Ranking list</string>
+    <string name="ranking_list">Leaderboard</string>
     <string name="text_invite_friends">Invite Friends</string>
     <string name="http_relive">http://76.231.168.66:9000/v1/relive</string>
     <string name="http_send_answer_to_server">http://76.231.168.66:9000/v1/answer</string>
     <string name="http_check_wheather_can_play">http://76.231.168.66:9000/v1/canplay?gid=</string>
+    <string name="string_money_300">$300</string>
+
+    <string name="string_money_120">$120</string>
+    <string name="string_get_more">more</string>
 
 </resources>

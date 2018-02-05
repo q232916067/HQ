@@ -11,12 +11,16 @@ import android.graphics.Paint;
 import android.graphics.PaintFlagsDrawFilter;
 import android.graphics.Path;
 import android.graphics.Region;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ImageView;
 import android.support.v7.widget.AppCompatImageView;
+
+import io.agora.agoraandroidhq.tools.GameControl;
+
 /**
  * android circle imageView
  *
@@ -82,4 +86,14 @@ public class CircleImageView extends ImageView {
        // cns.restoreToCount(saveCount);
     }
 
+
+   /* @Override
+    protected void onVisibilityChanged(@NonNull View changedView, int visibility) {
+        super.onVisibilityChanged(changedView, visibility);
+
+        if(visibility==View.VISIBLE){
+            GameControl.logD("invalidate ImageVIew");
+            invalidate();
+        }
+    }*/
 }

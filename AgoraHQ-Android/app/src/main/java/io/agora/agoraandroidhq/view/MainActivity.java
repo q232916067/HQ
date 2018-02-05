@@ -62,8 +62,10 @@ public class MainActivity extends Activity {
     protected void onResume() {
         super.onResume();
         playGame.setClickable(true);
-        sharedPreferenceHelper = getSharedPreference();
+
         initConstantsHttp();
+        channelNameEditText.requestFocus();
+        setUserImageFormSharedPreference(labelImage);
     }
 
 
@@ -90,7 +92,7 @@ public class MainActivity extends Activity {
 
         labelName.setText(userNameFromSharedPreference);
 
-        setUserImageFormSharedPreference(labelImage);
+
 
 
     }
@@ -121,10 +123,8 @@ public class MainActivity extends Activity {
         if (drawable == null) {
             return;
         } else {
-
             imageView.setImageDrawable(drawable);
         }
-
     }
 
 
@@ -249,6 +249,8 @@ public class MainActivity extends Activity {
     @Override
     protected void onStart() {
         super.onStart();
+        sharedPreferenceHelper = getSharedPreference();
+        sharedPreferenceHelper.saveDrawable(((BitmapDrawable)labelImage.getDrawable()).getBitmap());
 
     }
 
@@ -284,6 +286,7 @@ public class MainActivity extends Activity {
         }
     }
 
+    private Bitmap currentBitmap;
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -297,19 +300,32 @@ public class MainActivity extends Activity {
             String imagePath = c.getString(columnIndex);
             GameControl.logD("bitmapSIze  filePath  =  " + imagePath);
             if (imagePath != null) {
-
-
                 //GameControl.logD("bitmapSIze =  " + bitmap.getByteCount());
 
-                Bitmap bitmaps = resizeBitmap(imagePath, 80, 80);
-
+               //Bitmap bitmaps = resizeBitmap(imagePath, 80, 80);
+               Bitmap bitmaps = getFitSampleBitmap(imagePath,150,150);
+                GameControl.logD("bitmap Size = "+ bitmaps.getByteCount());
 
                 if (bitmaps != null) {
+                   /* Bitmap bitmap = ((BitmapDrawable) ((ImageView) labelImage).getDrawable()).getBitmap();
+
+                    if(bitmap!=null){
+                        bitmap.recycle();
+                        bitmap = null;
+                    }*/
+                    //labelImage.setImageBitmap(0);
+
                     labelImage.setImageBitmap(bitmaps);
                     sharedPreferenceHelper.saveDrawable(bitmaps);
+
+                    if(currentBitmap != null){
+                        currentBitmap.recycle();
+                        currentBitmap = null;
+                        currentBitmap = bitmaps;
+                    }
                 }
 
-
+                System.gc();
                 c.close();
             }
         }
@@ -358,6 +374,25 @@ public class MainActivity extends Activity {
         matrix = null;
         GameControl.logD("bitmapSIze =  after" + resizeBitmap.getByteCount());
         return resizeBitmap;
+    }
+
+
+    public static Bitmap getFitSampleBitmap(String file_path, int width, int height) {
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(file_path, options);
+        options.inSampleSize = getFitInSampleSize(width, height, options);
+        options.inJustDecodeBounds = false;
+        return BitmapFactory.decodeFile(file_path, options);
+    }
+    public static int getFitInSampleSize(int reqWidth, int reqHeight, BitmapFactory.Options options) {
+        int inSampleSize = 1;
+        if (options.outWidth > reqWidth || options.outHeight > reqHeight) {
+            int widthRatio = Math.round((float) options.outWidth / (float) reqWidth);
+            int heightRatio = Math.round((float) options.outHeight / (float) reqHeight);
+            inSampleSize = Math.min(widthRatio, heightRatio);
+        }
+        return inSampleSize;
     }
 
 }
