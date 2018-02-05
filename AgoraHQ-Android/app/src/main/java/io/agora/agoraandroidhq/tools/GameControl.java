@@ -18,7 +18,7 @@ public class GameControl {
 
     public static Question currentQuestion;
 
-    public static final boolean SHOW_LOG = false;
+    public static final boolean SHOW_LOG = true;
 
     public static boolean controlCheckThread = true;
 

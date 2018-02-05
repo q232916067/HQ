@@ -35,5 +35,11 @@
 
     <string name="string_money_120">$120</string>
     <string name="string_get_more">more</string>
+    <string name="gang_up_string">Gang up</string>
+    <string name="edittext_gang_up_channel_name">Channel Name</string>
+    <string name="leave_gang_up_room">Leave Gang Up</string>
+    <string name="leave_gang_up_room_success">Leave Gang Up Success</string>
+    <string name="game_create_channel_name">Create Channel</string>
+    <string name="game_join_channel">Join Channel</string>
 
 </resources>

@@ -395,4 +395,16 @@ public class MainActivity extends Activity {
         return inSampleSize;
     }
 
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        GameControl.logD("MainActivity  onBackPressed");
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        GameControl.logD("MainActivity  onDestory");
+    }
 }

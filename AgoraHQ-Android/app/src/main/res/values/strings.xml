@@ -33,6 +33,12 @@
     <string name="string_money_300">¥300</string>
     <string name="string_money_120">¥120</string>
     <string name="string_get_more">获取更多</string>
+    <string name="gang_up_string">开黑</string>
+    <string name="edittext_gang_up_channel_name">开黑频道</string>
+    <string name="leave_gang_up_room">离开开黑</string>
+    <string name="leave_gang_up_room_success">离开开黑成功</string>
+    <string name="game_create_channel_name">创建频道</string>
+    <string name="game_join_channel">加入频道</string>
 
     <drawable name="button_press">#8888</drawable>
 </resources>
