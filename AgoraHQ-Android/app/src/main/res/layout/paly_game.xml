@@ -11,6 +11,23 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"></FrameLayout>
 
+    <RelativeLayout
+        android:id="@+id/answer_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="40dp">
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/messageRecycleView"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+
+            android:layout_marginBottom="187dp"></android.support.v7.widget.RecyclerView>
+
+    </RelativeLayout>
 
     <FrameLayout
         android:layout_width="match_parent"
@@ -26,7 +43,7 @@
             android:layout_height="40dp"
             android:background="@drawable/back" />
 
-        <Button
+       <!-- <Button
             android:layout_width="wrap_content"
             android:layout_height="30dp"
             android:layout_gravity="right"
@@ -35,7 +52,7 @@
             android:padding="3dp"
             android:background="@drawable/game_gang_up_back"
             android:onClick="gangUpClick"
-            android:text="@string/gang_up_string" />
+            android:text="@string/gang_up_string" />-->
     </FrameLayout>
 
     <ImageView
@@ -102,24 +119,6 @@
         android:layout_marginTop="80dp"
         android:orientation="vertical"
         android:visibility="gone" />
-
-    <RelativeLayout
-        android:id="@+id/answer_view"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="40dp">
-
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/messageRecycleView"
-            android:layout_width="200dp"
-            android:layout_height="200dp"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-
-            android:layout_marginBottom="187dp"></android.support.v7.widget.RecyclerView>
-
-    </RelativeLayout>
 
     <!-- <Button
          android:layout_width="200dp"
@@ -203,6 +202,8 @@
             android:textColor="@color/black"
             android:textStyle="bold" />
     </LinearLayout>
+
+
 
 
 </FrameLayout>

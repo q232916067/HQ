@@ -410,7 +410,7 @@ public class GameActivity extends Activity {
     private ImageView imageViewBack;
     private ImageView sendMessageImage;
     private FrameLayout game_view_layout;
-    private Button gameGangUpButton;
+   // private Button gameGangUpButton;
     private boolean wheatherHasFocus = false;
 
     private void findView() {
@@ -425,7 +425,7 @@ public class GameActivity extends Activity {
             }
         });
 
-        gameGangUpButton = findViewById(R.id.game_gang_up_btn);
+      //  gameGangUpButton = findViewById(R.id.game_gang_up_btn);
         game_view_layout = findViewById(R.id.game_view_layout);
         messageLinearLayou = findViewById(R.id.sendMessage_layout);
         input_editor = findViewById(R.id.input_editor);
@@ -537,8 +537,6 @@ public class GameActivity extends Activity {
     @Override
     protected void onStart() {
         super.onStart();
-
-        isInGangUp = false;
     }
 
 
@@ -587,10 +585,6 @@ public class GameActivity extends Activity {
                }
            });
 
-        }
-
-        if (gangUpRtcEngineEventHandler != null) {
-            gangUpRtcEngineEventHandler = null;
         }
         leaveChannel();
         // RtcEngine.destroy(rtcEngine);
@@ -971,13 +965,13 @@ public class GameActivity extends Activity {
     private void leaveChannel() {
         if (rtcEngine != null) {
             rtcEngine.leaveChannel();
-            RtcEngine.destroy(rtcEngine);
+            RtcEngine.destroy();
         }
 
-        if (gangUpRtcEngine != null) {
+        /*if (gangUpRtcEngine != null) {
             gangUpRtcEngine.leaveChannel();
             RtcEngine.destroy(gangUpRtcEngine);
-        }
+        }*/
     }
 
     // Tutorial Step 7
@@ -1334,141 +1328,4 @@ public class GameActivity extends Activity {
         });
     }
 
-
-    private EditText gang_up_channel_name;
-    private Button createGangUpChannel;
-    private Button joinGangUpChannel;
-    private AlertDialog gangUpAlertDialog;
-
-    private RtcEngine gangUpRtcEngine;
-
-    private boolean isInGangUp;
-    private boolean wheatherCanPlayGame;
-
-
-    IRtcEngineEventHandler gangUpRtcEngineEventHandler = new IRtcEngineEventHandler() {
-        @Override
-        public void onJoinChannelSuccess(String channel, int uid, int elapsed) {
-            super.onJoinChannelSuccess(channel, uid, elapsed);
-            GameControl.logD("onJoinChannelSuccess gangUp  =  " + channel);
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-
-                    isInGangUp = true;
-
-
-                    gameGangUpButton.setText(R.string.leave_gang_up_room);
-                }
-            });
-        }
-
-        @Override
-        public void onLeaveChannel(RtcStats stats) {
-            super.onLeaveChannel(stats);
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    toastHelper(getString(R.string.leave_gang_up_room_success));
-                    isInGangUp = false;
-                    gameGangUpButton.setText(R.string.gang_up_string);
-
-                }
-            });
-        }
-    };
-
-
-    private void initGangUpRtcEngine() {
-
-        try {
-            gangUpRtcEngine = RtcEngine.create(GameActivity.this, Constants.AGORA_APP_ID, gangUpRtcEngineEventHandler);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-    }
-
-    public void gangUpClick(View view) {
-
-        if (isInGangUp) {
-            gangUpRtcEngine.leaveChannel();
-
-        } else {
-
-            AlertDialog.Builder builder = new AlertDialog.Builder(GameActivity.this);
-
-            View gang_up_view = View.inflate(GameActivity.this, R.layout.gang_up_layout, null);
-
-
-            gang_up_channel_name = gang_up_view.findViewById(R.id.gang_up_channel_name_editText);
-            /*createGangUpChannel = gang_up_view.findViewById(R.id.create_gang_up_channel);
-            joinGangUpChannel = gang_up_view.findViewById(R.id.join_gang_up_channel);
-            */
-            builder.setView(gang_up_view);
-            builder.setCancelable(true);
-            AlertDialog dialog = builder.create();
-            gangUpAlertDialog = dialog;
-            dialog.show();
-        }
-    }
-
-    public void createGangUpChannelClick(View view) {
-
-        if (gangUpRtcEngine == null) {
-            initGangUpRtcEngine();
-        }
-
-        String channelName = getGangUpChannelName();
-
-
-        if (TextUtils.isEmpty(channelName)) {
-            toastHelper("Channel name can not be null");
-        } else {
-            toastHelper("Create Channel =  " + channelName);
-            if (gangUpAlertDialog != null) {
-                gangUpAlertDialog.dismiss();
-            }
-
-            isJoinGangUpChannel = false;
-
-            String realChannelName = GameControl.currentUser.channelName + "_" + channelName;
-            gangUpRtcEngine.setParameters("{\"rtc.hq_mode\": {\"hq\": true, \"broadcaster\":true, \"bitrate\":1000}}");
-
-            gangUpRtcEngine.joinChannel(null, realChannelName, "Extra Optional Data", Integer.parseInt(GameControl.currentUser.account)); // if you do not specify the uid, we will generate the uid for you
-
-        }
-    }
-
-    private boolean isJoinGangUpChannel;
-
-    public void joinGangUpChannel(View view) {
-        if (gangUpRtcEngine == null) {
-            initGangUpRtcEngine();
-        }
-
-        String channelName = getGangUpChannelName();
-
-        if (TextUtils.isEmpty(channelName)) {
-            toastHelper("Channel name can not be null");
-        } else {
-            toastHelper(" Join Channel = " + channelName);
-            if (gangUpAlertDialog != null) {
-                gangUpAlertDialog.dismiss();
-                isJoinGangUpChannel = true;
-                String realChannelName = GameControl.currentUser.channelName + "_" + channelName;
-                gangUpRtcEngine.setParameters("{\"rtc.hq_mode\": {\"hq\": true, \"broadcaster\":true, \"bitrate\":1000}}");
-
-                gangUpRtcEngine.joinChannel(null, realChannelName, "Extra Optional Data", Integer.parseInt(GameControl.currentUser.account)); // if you do not specify the uid, we will generate the uid for you
-
-            }
-        }
-    }
-
-    private String getGangUpChannelName() {
-
-        String gangUpChannelName = gang_up_channel_name.getText().toString();
-
-        return gangUpChannelName;
-    }
 }
