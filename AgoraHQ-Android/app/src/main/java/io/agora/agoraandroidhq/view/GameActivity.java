@@ -80,10 +80,6 @@ public class GameActivity extends Activity {
         setContentView(R.layout.paly_game);
         this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-
-
-        //joinChatRoom(Constants.chatRoom);
-        //joinChatRoom(Constants.questionRoom);
         try {
             init();
         } catch (Exception e) {
@@ -108,36 +104,21 @@ public class GameActivity extends Activity {
         loginAgoraSignal();
         GameControl.logD("init");
         findView();
-        //AgoraLinkToCloud.addEventHandler(handler);
-        //joinChannel();
-
         initQuestionLayout();
-
-        //startCheckWheatherCanPlay();
-        // checkWheatherCanPlay();
         GameControl.controlCheckThread = true;
-
         getUser();
-
-
         checkSelfPermissions();
-
         executorService = createExcetorService();
-
     }
 
     private ExecutorService executorService;
 
     private ExecutorService createExcetorService() {
-
         ExecutorService executorService = Executors.newCachedThreadPool();
-
         return executorService;
     }
 
     private String getAccount() {
-
-
         String uid = Constants.UID.toString() + new Random().nextInt(100000);
         GameControl.logD("getAccount = " + uid);
         return uid;
@@ -154,15 +135,12 @@ public class GameActivity extends Activity {
     private AgoraSignal agoraSignal;
 
     private void loginAgoraSignal() {
-
         agoraSignal = AgoraSignal.newInstance(GameActivity.this, Constants.AGORA_APP_ID, getAccount(), getChannelName());
         agoraSignal.addEventHandler(agoraHandler);
         agoraSignal.login();
-
     }
 
     private boolean wheatherChangeGameReuslt = true;
-
     private Handler agoraHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -205,14 +183,21 @@ public class GameActivity extends Activity {
 
                             int correct = result.correct;
                             int res = result.result;
+                            int chooseResult = -1;
+                            GameControl.logD("clientWheatherCanPlay = " + GameControl.clientWheatherCanPlay + "  serverWheatherCanPlay = " + GameControl.serverWheatherCanPlay);
+                            if (GameControl.clientWheatherCanPlay && GameControl.serverWheatherCanPlay) {
+                                chooseResult = GameControl.result;
+                            } else {
+                                chooseResult = -1;
+                            }
 
                             if (GameControl.currentQuestion != null) {
                                 GameControl.logD("GameControl.currentQues = " + GameControl.currentQuestion.toString());
                                 GameControl.logD("result  showHighLightCheckBox  =  " + checkBox_item.size());
-                                   /* setCheckBoxBackHighLight(res);
-*/
+                                   /* setCheckBoxBackHighLight(res);4*/
+                                GameControl.logD("res  = " + res + " chooseResult  = " + chooseResult);
 
-                                if (correct == 0) {
+                                if ((res != chooseResult)) {
                                     int answer = res + 1;
                                     time_reduce.setText(getString(R.string.answer_error_message));
 
@@ -258,7 +243,7 @@ public class GameActivity extends Activity {
                                 }
                             }
 
-
+                            GameControl.result = -1;
                             logD(" Serverwheather " + GameControl.serverWheatherCanPlay + "  " + "ClientServer  " + GameControl.clientWheatherCanPlay);
 
                             break;
@@ -410,7 +395,7 @@ public class GameActivity extends Activity {
     private ImageView imageViewBack;
     private ImageView sendMessageImage;
     private FrameLayout game_view_layout;
-   // private Button gameGangUpButton;
+    // private Button gameGangUpButton;
     private boolean wheatherHasFocus = false;
 
     private void findView() {
@@ -425,7 +410,7 @@ public class GameActivity extends Activity {
             }
         });
 
-      //  gameGangUpButton = findViewById(R.id.game_gang_up_btn);
+        //  gameGangUpButton = findViewById(R.id.game_gang_up_btn);
         game_view_layout = findViewById(R.id.game_view_layout);
         messageLinearLayou = findViewById(R.id.sendMessage_layout);
         input_editor = findViewById(R.id.input_editor);
@@ -575,20 +560,19 @@ public class GameActivity extends Activity {
         questionFlag = false;
 
 
-
         if (agoraSignal != null) {
             agoraSignal.removeEnventHandler();
-           executorService.execute(new Runnable() {
-               @Override
-               public void run() {
-                   agoraSignal.onLogoutSDKClick();
-               }
-           });
+            executorService.execute(new Runnable() {
+                @Override
+                public void run() {
+                    agoraSignal.onLogoutSDKClick();
+                }
+            });
 
         }
         leaveChannel();
         // RtcEngine.destroy(rtcEngine);
-        mRtcEventHandler=null;
+        mRtcEventHandler = null;
 
         recyclerView = null;
         messageRecyclerViewAdapter = null;
@@ -609,7 +593,7 @@ public class GameActivity extends Activity {
     private RtcEngine rtcEngine;
 
 
-    private  IRtcEngineEventHandler mRtcEventHandler = new IRtcEngineEventHandler() { // Tutorial Step 1
+    private IRtcEngineEventHandler mRtcEventHandler = new IRtcEngineEventHandler() { // Tutorial Step 1
         @Override
         public void onFirstRemoteVideoDecoded(final int uid, int width, int height, int elapsed) { // Tutorial Step 5
             // logD("onFirstRemoteVideoDecode");
@@ -727,9 +711,10 @@ public class GameActivity extends Activity {
 
                         questionFlag = false;
                         if (GameControl.serverWheatherCanPlay && GameControl.clientWheatherCanPlay) {
-                            GameControl.clientWheatherCanPlay = false;
+                            //  GameControl.clientWheatherCanPlay = false;
                             submitAnswer();
                         } else {
+                            GameControl.result = -1;
                             Toast.makeText(GameActivity.this, "you can not play", Toast.LENGTH_SHORT).show();
                         }
                         game_layout.setVisibility(View.GONE);
@@ -900,7 +885,6 @@ public class GameActivity extends Activity {
         }
     }
 
-
     private void joinAgoraLiveChannel() throws Exception {
         new Thread() {
             @Override
@@ -915,7 +899,6 @@ public class GameActivity extends Activity {
 
             }
         }.start();
-        //joinChannel();
     }
 
     // Tutorial Step 2
@@ -923,16 +906,6 @@ public class GameActivity extends Activity {
         rtcEngine.enableVideo();
         rtcEngine.setVideoProfile(io.agora.rtc.Constants.VIDEO_PROFILE_360P, false);
     }
-
-    /*// Tutorial Step 3
-    private void setupLocalVideo() {
-        FrameLayout container = (FrameLayout) findViewById(R.id.local_video_view_container);
-        SurfaceView surfaceView = RtcEngine.CreateRendererView(getBaseContext());
-        surfaceView.setZOrderMediaOverlay(true);
-        container.addView(surfaceView);
-        rtcEngine.setupLocalVideo(new VideoCanvas(surfaceView, VideoCanvas.RENDER_MODE_ADAPTIVE, 0));
-    }*/
-
 
     private void initAgoraEngine() throws Exception {
         rtcEngine = RtcEngine.create(GameActivity.this, Constants.AGORA_APP_ID, mRtcEventHandler);
@@ -951,14 +924,9 @@ public class GameActivity extends Activity {
         if (container.getChildCount() >= 1) {
             return;
         }
-
         SurfaceView surfaceView = RtcEngine.CreateRendererView(getBaseContext());
         container.addView(surfaceView);
         rtcEngine.setupRemoteVideo(new VideoCanvas(surfaceView, VideoCanvas.RENDER_MODE_HIDDEN, uid));
-
-        surfaceView.setTag(uid); // for mark purpose
-       /* View tipMsg = findViewById(R.id.quick_tips_when_use_agora_sdk); // optional UI
-        tipMsg.setVisibility(View.GONE);*/
     }
 
     // Tutorial Step 6
@@ -967,11 +935,6 @@ public class GameActivity extends Activity {
             rtcEngine.leaveChannel();
             RtcEngine.destroy();
         }
-
-        /*if (gangUpRtcEngine != null) {
-            gangUpRtcEngine.leaveChannel();
-            RtcEngine.destroy(gangUpRtcEngine);
-        }*/
     }
 
     // Tutorial Step 7
@@ -998,7 +961,7 @@ public class GameActivity extends Activity {
     private Button submit_btn;
     private LinearLayout question_layout;
 
-   // private ArrayList<String> questionData = new ArrayList<String>();
+    // private ArrayList<String> questionData = new ArrayList<String>();
     private ArrayList<CheckBox> checkBox_item = new ArrayList<CheckBox>();
     private ArrayList<View> board = new ArrayList<View>();
 
@@ -1043,20 +1006,6 @@ public class GameActivity extends Activity {
         });
     }
 
-
-    /*@Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.submit_button:
-
-                submitAnswer();
-
-
-                break;
-
-        }
-    }*/
-
     private void submitAnswer() {
         questionFlag = false;
         // StringBuilder builder = new StringBuilder();
@@ -1067,6 +1016,7 @@ public class GameActivity extends Activity {
             if (checkBox.isChecked()) {
                 a = i;
             }
+
         }
 
         if (a == -1) {
@@ -1075,14 +1025,11 @@ public class GameActivity extends Activity {
             Toast.makeText(GameActivity.this, R.string.choose_success_message, Toast.LENGTH_SHORT).show();
         }
 
-        //  Toast.makeText(GameActivity.this, builder.toString(), Toast.LENGTH_SHORT).show();
-
         GameControl.logD("submit answer  url = " + Constants.HTTP_SEND_ANSWER_TO_SERVER);
         try {
             AgoraSignal.sendAnswerToserver(GameControl.currentQuestion.getId(), a, new HttpUrlUtils.OnResponse() {
                 @Override
                 public void onResponse(String data) {
-
                     // logD("sendAnswerToserver   = " + data);
                     GameControl.logD("sendAnswer OnResponse  =  " + data);
                 }
@@ -1090,29 +1037,21 @@ public class GameActivity extends Activity {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-
         //question_layout.removeAllViews();
         checkBox_item.clear();
         board.clear();
         // questionData.clear();
         game_layout.setVisibility(View.GONE);
         questionTime = GameControl.timeOut;
-
     }
-
 
     private void setCheckBoxBackHighLight(int result) {
-
         checkBox_item.get(result).setBackgroundColor(Color.GREEN);
-
     }
-
 
     private ArrayList answerList;
 
     private void showquestionView(Question question) {
-        //  int num = random.nextInt(10);
-        //  logD("num  = "+num);
         answerList = new ArrayList();
         logD("c  :  " + question.getAnswerString().toString());
         logD("aanswer  = " + answerList.toString());
@@ -1148,8 +1087,6 @@ public class GameActivity extends Activity {
                 board.add(bo);
                 question_layout.addView(bo);
             }
-
-
         }
         game_layout.setVisibility(View.VISIBLE);
         wheath_canPlay_TextView.setVisibility(View.GONE);
@@ -1158,52 +1095,6 @@ public class GameActivity extends Activity {
         logD("showQuestionend   :" + checkBox_item.size() + " ------  question  ---" + game_layout.getVisibility() + "   " + View.VISIBLE);
         //time = 10;
     }
-
-
-    private View createCheck(String text, int position) {
-
-        LinearLayout view = new LinearLayout(GameActivity.this);
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT, 1);
-        // params.setMargins(left, top, right, bottom);
-        params.setMargins(0, 20, 0, 20);
-        // view.setBackgroundColor(Color.BLACK);
-        view.setLayoutParams(params);
-        view.setTag(position);
-
-        // View view = game_layout.findViewById(R.id.question_layout);
-        CheckBox box = new CheckBox(GameActivity.this);
-        GameControl.logD("text  = " + text);
-        ViewGroup.MarginLayoutParams layoutParams = new ViewGroup.MarginLayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        layoutParams.setMargins(0, 15, 0, 15);
-        box.setText(text);
-        box.setTextColor(Color.BLACK);
-        box.setTextSize(20);
-        //box.setTag(position);
-        box.setLayoutParams(layoutParams);
-        box.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
-                    for (int i = 0; i < checkBox_item.size(); i++) {
-                        if (checkBox_item.get(i) != buttonView) {
-                            checkBox_item.get(i).setChecked(false);
-                        }
-                    }
-                }
-            }
-        });
-
-        checkBox_item.add(box);
-
-        view.addView(box);
-
-
-        return view;
-    }
-
-
-    //private int time = 10;
 
     private CheckBox createCheckBox(String text, int position) {
 
@@ -1223,6 +1114,10 @@ public class GameActivity extends Activity {
                     for (int i = 0; i < checkBox_item.size(); i++) {
                         if (checkBox_item.get(i) != buttonView) {
                             checkBox_item.get(i).setChecked(false);
+                        }
+
+                        if (checkBox_item.get(i) == buttonView) {
+                            GameControl.result = i;
                         }
                     }
                 }

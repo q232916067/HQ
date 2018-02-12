@@ -70,8 +70,8 @@ public class AgoraHQSigSDK {
         this.mCtx = new WeakReference<>(context);
         this.mAppId = appId;
         mAgoraSigSDK = AgoraAPIOnlySignal.getInstance(context, appId);
-       // mAgoraSigSDK.dbg("lbs_100", "1");
-        mAgoraSigSDK.dbg("lbss", "125.88.159.173");
+        mAgoraSigSDK.dbg("lbs_100", "1");
+       // mAgoraSigSDK.dbg("lbss", "125.88.159.173");
 
         initRCIfPossible(context, appId, null);
 
