@@ -47,9 +47,12 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import io.agora.agoraandroidhq.HqApplication;
 import io.agora.agoraandroidhq.R;
 import io.agora.agoraandroidhq.control.AgoraSignal;
 import io.agora.agoraandroidhq.control.JsonToString;
+import io.agora.agoraandroidhq.control.WorkerThread;
+import io.agora.agoraandroidhq.module.AGEventHandler;
 import io.agora.agoraandroidhq.module.Question;
 import io.agora.agoraandroidhq.module.Result;
 import io.agora.agoraandroidhq.module.User;
@@ -67,326 +70,11 @@ import io.agora.rtc.video.VideoCanvas;
  * Created by zhangtao on 2018/1/12.
  */
 
-public class GameActivity extends Activity {
+public class GameActivity extends BaseActivity implements AGEventHandler {
 
 
     private boolean isFirst = true;
-
-    @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        this.requestWindowFeature(Window.FEATURE_NO_TITLE);
-
-        setContentView(R.layout.paly_game);
-        this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-        try {
-            init();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-
-    private User getUser() {
-
-        User currentUser = new User();
-        currentUser.name = GameControl.currentUserName;
-        currentUser.drawable = GameControl.currentUserHeadImage;
-        String channelName = getChannelName();
-        currentUser.setChannelName(channelName);
-        GameControl.currentUser = currentUser;
-
-        return currentUser;
-    }
-
-    private void init() throws Exception {
-        loginAgoraSignal();
-        GameControl.logD("init");
-        findView();
-        initQuestionLayout();
-        GameControl.controlCheckThread = true;
-        getUser();
-        checkSelfPermissions();
-        executorService = createExcetorService();
-    }
-
-    private ExecutorService executorService;
-
-    private ExecutorService createExcetorService() {
-        ExecutorService executorService = Executors.newCachedThreadPool();
-        return executorService;
-    }
-
-    private String getAccount() {
-        String uid = Constants.UID.toString() + new Random().nextInt(100000);
-        GameControl.logD("getAccount = " + uid);
-        return uid;
-    }
-
-    private String getChannelName() {
-        Intent intent = getIntent();
-        String channelName = intent.getStringExtra("ChannelName");
-        GameControl.logD("getChannelName  = " + channelName);
-        return channelName;
-    }
-
-
-    private AgoraSignal agoraSignal;
-
-    private void loginAgoraSignal() {
-        agoraSignal = AgoraSignal.newInstance(GameActivity.this, Constants.AGORA_APP_ID, getAccount(), getChannelName());
-        agoraSignal.addEventHandler(agoraHandler);
-        agoraSignal.login();
-    }
-
-    private boolean wheatherChangeGameReuslt = true;
-    private Handler agoraHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            super.handleMessage(msg);
-            switch (msg.what) {
-                case Constants.LOGIN_AGORA_SIGNAL_FAIL:
-                    GameControl.logD("LOGIN_AGORA_SIGNAL_FAIL");
-                    toastHelper(getString(R.string.login_agora_signal_fail));
-                    //finish();
-                    agoraSignal.login();
-                    break;
-                case Constants.LOGIN_AGORA_SIGNAL_SUCCESS:
-                    GameControl.logD("LOGIN_AGORA_SIGNAL_SUCCESS");
-                    toastHelper(getString(R.string.login_agora_signal_success));
-
-                    break;
-
-                case Constants.AGORA_SIGNAL_RECEIVE:
-
-
-                    String mess = (String) msg.obj;
-                    Object jsonObject = null;
-                    try {
-                        jsonObject = JsonToString.jsonToString(mess);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                    GameControl.logD("AGORA_SIGNAL_RECEIVE   =  " + mess + "  strinType = " + JsonToString.strinType);
-                    switch (JsonToString.strinType) {
-
-                        case "chat":
-                            io.agora.agoraandroidhq.module.Message message = (io.agora.agoraandroidhq.module.Message) jsonObject;
-                            messageRecyclerViewAdapter.updateData(message);
-                            recyclerView.smoothScrollToPosition(messageRecyclerViewAdapter.getItemCount() - 1);
-
-                            break;
-
-                        case "result":
-                            Result result = (Result) jsonObject;
-
-                            int correct = result.correct;
-                            int res = result.result;
-                            int chooseResult = -1;
-                            GameControl.logD("clientWheatherCanPlay = " + GameControl.clientWheatherCanPlay + "  serverWheatherCanPlay = " + GameControl.serverWheatherCanPlay);
-                            if (GameControl.clientWheatherCanPlay && GameControl.serverWheatherCanPlay) {
-                                chooseResult = GameControl.result;
-                            } else {
-                                chooseResult = -1;
-                            }
-
-                            if (GameControl.currentQuestion != null) {
-                                GameControl.logD("GameControl.currentQues = " + GameControl.currentQuestion.toString());
-                                GameControl.logD("result  showHighLightCheckBox  =  " + checkBox_item.size());
-                                   /* setCheckBoxBackHighLight(res);4*/
-                                GameControl.logD("res  = " + res + " chooseResult  = " + chooseResult);
-
-                                if ((res != chooseResult)) {
-                                    int answer = res + 1;
-                                    time_reduce.setText(getString(R.string.answer_error_message));
-
-                                    time_reduce.setTextColor(Color.RED);
-                                    time_reduce.setVisibility(View.VISIBLE);
-                                    //game_title.setVisibility(View.INVISIBLE);
-                                    GameControl.clientWheatherCanPlay = false;
-
-                                    if (questionTime != 0 && (questionTime != GameControl.timeOut)) {
-                                        questionTime = 0;
-                                    }
-
-                                    if (wheatherChangeGameReuslt) {
-
-                                        GameControl.gameResult = false;
-                                        wheatherChangeGameReuslt = false;
-                                    }
-
-                                } else {
-
-
-                                    time_reduce.setText(R.string.answer_correct_message);
-                                    time_reduce.setTextColor(Color.GREEN);
-                                    time_reduce.setVisibility(View.VISIBLE);
-                                    //game_title.setVisibility(View.INVISIBLE);
-                                    GameControl.clientWheatherCanPlay = true;
-
-                                    if (questionTime != 0 && (questionTime != GameControl.timeOut)) {
-                                        questionTime = 0;
-                                    }
-                                }
-
-
-                                questionTimeHandler.sendEmptyMessageDelayed(1, 5000);
-                                //time_reduce.setVisibility(View.INVISIBLE);
-                                game_layout.setVisibility(View.VISIBLE);
-                                submit_btn.setVisibility(View.GONE);
-                                getCorrectCheckBox(res);
-
-
-                                if ((GameControl.currentQuestion.getId() + 1) == GameControl.total) {
-                                    questionTimeHandler.sendEmptyMessageDelayed(2, 6000);
-                                }
-                            }
-
-                            GameControl.result = -1;
-                            logD(" Serverwheather " + GameControl.serverWheatherCanPlay + "  " + "ClientServer  " + GameControl.clientWheatherCanPlay);
-
-                            break;
-
-
-                        case "quiz":
-/*
-                            try {
-                                checkWheatherCanPlay();
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }*/
-                            Question question = (Question) jsonObject;
-                            ;
-
-                            /*if (GameControl.clientWheatherCanPlay && GameControl.serverWheatherCanPlay) {
-
-                                showquestionView(question);
-
-                            }*/
-                            if (question.getId() == 1) {
-                                GameControl.gameResult = true;
-                                wheatherChangeGameReuslt = true;
-                            }
-
-
-                            GameControl.logD("save Question :  id = " + question.getId() + "  " + question.getTimeOut());
-
-                            if (question != null) {
-                                GameControl.setCurrentQuestion(question);
-                                int total = GameControl.currentQuestion.getTotalQuestion();
-                                int timeOut = GameControl.currentQuestion.getTimeOut();
-
-                                if (total != 0) {
-                                    GameControl.total = total;
-                                }
-
-                                if (timeOut != 0) {
-                                    GameControl.timeOut = timeOut;
-                                    time_reduce.setText(timeOut + " s");
-                                }
-                            }
-
-                            logD("quiz   showQuestion" + isFirst);
-                            //showQuestion();
-                            //showquestionView(GameControl.currentQuestion);
-                            try {
-                                if (!isFirst) {
-                                    checkWheatherCanPlay();
-
-                                    isFirst = false;
-                                }
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                            break;
-
-                    }
-                    break;
-
-                case Constants.AGORA_SIGNAL_SEND:
-                    // TextMessage sendContent = (TextMessage) msg.obj;
-
-                    // String sendName = sendContent.getUserInfo().getUserId();
-                    // String messge = sendContent.getContent();
-                    //logD("handleMessage   = " + messge);
-
-                    String sendMessage = (String) msg.obj;
-                    GameControl.logD("sendMessage  = " + sendMessage);
-                    io.agora.agoraandroidhq.module.Message jsonObjects = null;
-                    try {
-                        jsonObjects = (io.agora.agoraandroidhq.module.Message) JsonToString.jsonToString(sendMessage);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                    GameControl.logD("sendMessage  sendName  sendContent " + jsonObjects.getContent() + "   " + jsonObjects.getSender());
-                    String sendName = jsonObjects.getSender();
-
-                    String content = jsonObjects.getContent();
-                    GameControl.logD("sendMessage = ");
-                    io.agora.agoraandroidhq.module.Message message = new io.agora.agoraandroidhq.module.Message(sendName, content);
-                    message.setIsMe(true);
-                    messageRecyclerViewAdapter.updateData(message);
-
-
-                    try {
-                        Thread.sleep(600);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-
-                    recyclerView.smoothScrollToPosition(messageRecyclerViewAdapter.getItemCount() - 1);
-                    break;
-
-                case Constants.MESSAGE_SEND_ERROR:
-                    //TODO
-                    break;
-                default:
-                    break;
-
-            }
-        }
-    };
-
-
-    private void toastHelper(String message) {
-        Toast.makeText(GameActivity.this, message, Toast.LENGTH_SHORT).show();
-    }
-
-
-    private void logD(String message) {
-        Log.d("zhangHQ", message + "");
-    }
-
-
-    private void startCheckWheatherCanPlay() {
-
-        executorService.execute(new Runnable() {
-            @Override
-            public void run() {
-
-
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                GameControl.logD("startCheckWheatherCanPalyThread");
-
-                try {
-                    if (isFirst) {
-                        checkWheatherCanPlay();
-
-                        isFirst = false;
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-    }
-
-
+    private String tag = "[GameActivity]   ";
     private RecyclerView recyclerView;
     private MessageRecyclerViewAdapter messageRecyclerViewAdapter;
     private LinearLayout messageLinearLayou;
@@ -397,25 +85,91 @@ public class GameActivity extends Activity {
     private FrameLayout game_view_layout;
     // private Button gameGangUpButton;
     private boolean wheatherHasFocus = false;
+    private ExecutorService executorService;
+    private WorkerThread workerThread;
+    private RtcEngine rtcEngine;
+    private boolean wheatherChangeGameReuslt = true;
+    private boolean isFirstTimeSEI = true;
+    private boolean questionFlag = true;
+    private ArrayList answerList;
+    private AgoraSignal agoraSignal;
+    private int questionTime;
+    private ImageView gameResult;
 
-    private void findView() {
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.paly_game);
+        initUIandEvent();
+        setUiListener();
+    }
+
+    @Override
+    protected void initUIandEvent() {
+        GameControl.logD(tag + " initUIandEvent");
+
+        try {
+            init();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         imageViewBack = findViewById(R.id.back_image);
-        imageViewBack.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //TODO
-
-
-                GameActivity.this.finish();
-            }
-        });
-
-        //  gameGangUpButton = findViewById(R.id.game_gang_up_btn);
         game_view_layout = findViewById(R.id.game_view_layout);
         messageLinearLayou = findViewById(R.id.sendMessage_layout);
         input_editor = findViewById(R.id.input_editor);
         sendButton = findViewById(R.id.sendMessage_text);
         sendMessageImage = findViewById(R.id.image_sendMessage);
+        recyclerView = findViewById(R.id.messageRecycleView);
+        messageRecyclerViewAdapter = new MessageRecyclerViewAdapter(GameActivity.this);
+        recyclerView.setAdapter(messageRecyclerViewAdapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this, RecyclerView.VERTICAL, false));
+        recyclerView.addItemDecoration(new MessageListDecoration());
+
+        if (messageRecyclerViewAdapter.getItemCount() > 0) {
+            recyclerView.smoothScrollToPosition(messageRecyclerViewAdapter.getItemCount() - 1);
+        }
+        // AgoraLinkToCloud.addEventHandler(handler);
+        gameResult = findViewById(R.id.game_result);
+    }
+
+    @Override
+    protected void deInitUIandEvent() {
+        GameControl.logD(tag + "deInitUIandEvent");
+        GameControl.controlCheckThread = false;
+        GameControl.currentQuestion = null;
+        questionFlag = false;
+        if (agoraSignal != null) {
+            agoraSignal.removeEnventHandler();
+            executorService.execute(new Runnable() {
+                @Override
+                public void run() {
+                    agoraSignal.onLogoutSDKClick();
+                }
+            });
+        }
+        recyclerView = null;
+        messageRecyclerViewAdapter = null;
+        checkBox_item.clear();
+        checkBox_item = null;
+        board.clear();
+        board = null;
+        questionTimeHandler = null;
+        executorService.shutdown();
+        workerThread.leaveChannel();
+        workerThread.eventHandler().removeEventHandler(this);
+        System.gc();
+    }
+
+    @Override
+    protected void setUiListener() {
+        imageViewBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //TODO
+                GameActivity.this.finish();
+            }
+        });
+        //  gameGangUpButton = findViewById(R.id.game_gang_up_btn);
         sendMessageImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -427,7 +181,6 @@ public class GameActivity extends Activity {
         input_editor.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
             }
 
             @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
@@ -452,19 +205,16 @@ public class GameActivity extends Activity {
                 } else {
 
                 }
-
             }
         });
 
         sendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                logD("sendButton Click");
                 String message = input_editor.getText().toString();
                 input_editor.clearFocus();
                 input_editor.setText("");
                 String messageString = null;
-
                 try {
                     messageString = JsonToString.sendMessageString(message);
 
@@ -478,8 +228,7 @@ public class GameActivity extends Activity {
                 } catch (JSONException e) {
 
                 }
-
-                GameControl.logD("messageSend  =  " + messageString);
+                GameControl.logD(tag + "messageSend  =  " + messageString);
 
                 if (TextUtils.isEmpty(message)) {
                     Toast.makeText(GameActivity.this, "content can not be null", Toast.LENGTH_SHORT).show();
@@ -492,203 +241,283 @@ public class GameActivity extends Activity {
                 }
             }
         });
-
-
         game_view_layout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 messageLinearLayou.setVisibility(View.GONE);
             }
         });
+    }
 
-        ArrayList arrayList = new ArrayList();
+    private User getUser() {
+        User currentUser = new User();
+        currentUser.name = GameControl.currentUserName;
+        currentUser.drawable = GameControl.currentUserHeadImage;
+        String channelName = getChannelName();
+        currentUser.setChannelName(channelName);
+        GameControl.currentUser = currentUser;
+        return currentUser;
+    }
 
+    private void init() throws Exception {
+        loginAgoraSignal();
+        GameControl.logD(tag + "init");
+        initQuestionLayout();
+        GameControl.controlCheckThread = true;
+        getUser();
+        checkSelfPermissions();
+        executorService = createExcetorService();
+    }
 
-        recyclerView = findViewById(R.id.messageRecycleView);
-        messageRecyclerViewAdapter = new MessageRecyclerViewAdapter(GameActivity.this, arrayList);
-        recyclerView.setAdapter(messageRecyclerViewAdapter);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this, RecyclerView.VERTICAL, false));
-        recyclerView.addItemDecoration(new MessageListDecoration());
+    private ExecutorService createExcetorService() {
+        ExecutorService executorService = Executors.newCachedThreadPool();
+        return executorService;
+    }
 
-        if (messageRecyclerViewAdapter.getItemCount() > 0) {
-            recyclerView.smoothScrollToPosition(messageRecyclerViewAdapter.getItemCount() - 1);
+    private String getAccount() {
+        String uid = Constants.UID.toString() + new Random().nextInt(100000);
+        GameControl.logD(tag + "getAccount = " + uid);
+        return uid;
+    }
+
+    private String getChannelName() {
+        Intent intent = getIntent();
+        String channelName = intent.getStringExtra("ChannelName");
+        GameControl.logD(tag + "getChannelName  = " + channelName);
+        return channelName;
+    }
+
+    private void loginAgoraSignal() {
+        agoraSignal = AgoraSignal.newInstance(GameActivity.this, Constants.AGORA_APP_ID, getAccount(), getChannelName());
+        agoraSignal.addEventHandler(agoraHandler);
+        agoraSignal.login();
+    }
+
+    private Handler agoraHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            switch (msg.what) {
+                case Constants.LOGIN_AGORA_SIGNAL_FAIL:
+                    GameControl.logD(tag + " LOGIN_AGORA_SIGNAL_FAIL");
+                    toastHelper(getString(R.string.login_agora_signal_fail));
+                    //finish();
+                    agoraSignal.login();
+                    break;
+                case Constants.LOGIN_AGORA_SIGNAL_SUCCESS:
+                    GameControl.logD(tag + "LOGIN_AGORA_SIGNAL_SUCCESS");
+                    toastHelper(getString(R.string.login_agora_signal_success));
+                    break;
+
+                case Constants.AGORA_SIGNAL_RECEIVE:
+                    String mess = (String) msg.obj;
+                    Object jsonObject = null;
+                    try {
+                        jsonObject = JsonToString.jsonToString(mess);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    GameControl.logD(tag + " AGORA_SIGNAL_RECEIVE   =  " + mess + "  strinType = " + JsonToString.strinType);
+                    switch (JsonToString.strinType) {
+
+                        case "chat":
+                            io.agora.agoraandroidhq.module.Message message = (io.agora.agoraandroidhq.module.Message) jsonObject;
+                            messageRecyclerViewAdapter.updateData(message);
+                            recyclerView.smoothScrollToPosition(messageRecyclerViewAdapter.getItemCount() - 1);
+                            break;
+
+                        case "result":
+                            Result result = (Result) jsonObject;
+                            int correct = result.correct;
+                            int res = result.result;
+                            int chooseResult = -1;
+                            GameControl.logD(tag + " clientWheatherCanPlay = " + GameControl.clientWheatherCanPlay + "  serverWheatherCanPlay = " + GameControl.serverWheatherCanPlay);
+                            if (GameControl.clientWheatherCanPlay && GameControl.serverWheatherCanPlay) {
+                                chooseResult = GameControl.result;
+                            } else {
+                                chooseResult = -1;
+                            }
+                            if (GameControl.currentQuestion != null) {
+                                GameControl.logD(tag + " GameControl.currentQues = " + GameControl.currentQuestion.toString());
+                                GameControl.logD(tag + " result  showHighLightCheckBox  =  " + checkBox_item.size());
+                                   /* setCheckBoxBackHighLight(res);4*/
+                                GameControl.logD(tag + " res  = " + res + " chooseResult  = " + chooseResult);
+
+                                if ((res != chooseResult)) {
+                                    int answer = res + 1;
+                                    time_reduce.setText(getString(R.string.answer_error_message));
+
+                                    time_reduce.setTextColor(Color.RED);
+                                    time_reduce.setVisibility(View.VISIBLE);
+                                    //game_title.setVisibility(View.INVISIBLE);
+                                    GameControl.clientWheatherCanPlay = false;
+
+                                    if (questionTime != 0 && (questionTime != GameControl.timeOut)) {
+                                        questionTime = 0;
+                                    }
+
+                                    if (wheatherChangeGameReuslt) {
+
+                                        GameControl.gameResult = false;
+                                        wheatherChangeGameReuslt = false;
+                                    }
+
+                                } else {
+                                    time_reduce.setText(R.string.answer_correct_message);
+                                    time_reduce.setTextColor(Color.GREEN);
+                                    time_reduce.setVisibility(View.VISIBLE);
+                                    //game_title.setVisibility(View.INVISIBLE);
+                                    GameControl.clientWheatherCanPlay = true;
+
+                                    if (questionTime != 0 && (questionTime != GameControl.timeOut)) {
+                                        questionTime = 0;
+                                    }
+                                }
+                                questionTimeHandler.sendEmptyMessageDelayed(1, 5000);
+                                //time_reduce.setVisibility(View.INVISIBLE);
+                                game_layout.setVisibility(View.VISIBLE);
+                                submit_btn.setVisibility(View.GONE);
+                                getCorrectCheckBox(res);
+                                if ((GameControl.currentQuestion.getId() + 1) == GameControl.total) {
+                                    questionTimeHandler.sendEmptyMessageDelayed(2, 6000);
+                                }
+                            }
+
+                            GameControl.result = -1;
+                            break;
+                        case "quiz":
+/*
+                            try {
+                                checkWheatherCanPlay();
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }*/
+                            Question question = (Question) jsonObject;
+                            ;
+
+                            /*if (GameControl.clientWheatherCanPlay && GameControl.serverWheatherCanPlay) {
+
+                                showquestionView(question);
+
+                            }*/
+                            if (question.getId() == 1) {
+                                GameControl.gameResult = true;
+                                wheatherChangeGameReuslt = true;
+                            }
+                            GameControl.logD(tag + " save Question :  id = " + question.getId() + "  " + question.getTimeOut());
+                            if (question != null) {
+                                GameControl.setCurrentQuestion(question);
+                                int total = GameControl.currentQuestion.getTotalQuestion();
+                                int timeOut = GameControl.currentQuestion.getTimeOut();
+                                if (total != 0) {
+                                    GameControl.total = total;
+                                }
+                                if (timeOut != 0) {
+                                    GameControl.timeOut = timeOut;
+                                    time_reduce.setText(timeOut + " s");
+                                }
+                            }
+                            //showQuestion();
+                            //showquestionView(GameControl.currentQuestion);
+                            try {
+                                if (!isFirst) {
+                                    checkWheatherCanPlay();
+
+                                    isFirst = false;
+                                }
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                            break;
+                    }
+                    break;
+                case Constants.AGORA_SIGNAL_SEND:
+                    // TextMessage sendContent = (TextMessage) msg.obj;
+
+                    // String sendName = sendContent.getUserInfo().getUserId();
+                    // String messge = sendContent.getContent();
+                    //logD("handleMessage   = " + messge);
+
+                    String sendMessage = (String) msg.obj;
+                    GameControl.logD(tag + " sendMessage  = " + sendMessage);
+                    io.agora.agoraandroidhq.module.Message jsonObjects = null;
+                    try {
+                        jsonObjects = (io.agora.agoraandroidhq.module.Message) JsonToString.jsonToString(sendMessage);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    GameControl.logD(tag + " sendMessage  sendName  sendContent " + jsonObjects.getContent() + "   " + jsonObjects.getSender());
+                    String sendName = jsonObjects.getSender();
+
+                    String content = jsonObjects.getContent();
+                    GameControl.logD(tag + " sendMessage = ");
+                    io.agora.agoraandroidhq.module.Message message = new io.agora.agoraandroidhq.module.Message(sendName, content);
+                    message.setIsMe(true);
+                    messageRecyclerViewAdapter.updateData(message);
+                    try {
+                        Thread.sleep(600);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+
+                    recyclerView.smoothScrollToPosition(messageRecyclerViewAdapter.getItemCount() - 1);
+                    break;
+
+                case Constants.MESSAGE_SEND_ERROR:
+                    //TODO
+                    break;
+                default:
+                    break;
+            }
         }
-        // AgoraLinkToCloud.addEventHandler(handler);
+    };
 
-        gameResult = findViewById(R.id.game_result);
+    private void toastHelper(String message) {
+        Toast.makeText(GameActivity.this, message, Toast.LENGTH_SHORT).show();
     }
 
+    private void startCheckWheatherCanPlay() {
+        executorService.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                GameControl.logD(tag + " startCheckWheatherCanPalyThread");
 
-    @Override
-    protected void onStart() {
-        super.onStart();
+                try {
+                    if (isFirst) {
+                        checkWheatherCanPlay();
+
+                        isFirst = false;
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
-
 
     private void checkWheatherCanPlay() throws JSONException {
         AgoraSignal.checkWheatherCanPlay(new HttpUrlUtils.OnResponse() {
             @Override
             public void onResponse(String data) throws JSONException {
-                //logD(data);
-
                 if (data.equals(Constants.MESSAGE_TOAST)) {
                     return;
                 }
-
                 // isFirst = false;
-
                 if (data != null) {
                     JSONObject object = new JSONObject(data);
                     boolean wheatherCanPlay = object.getBoolean("result");
-                    logD("wheatherCanPlay  =  " + wheatherCanPlay);
                     GameControl.serverWheatherCanPlay = wheatherCanPlay;
                     object = null;
                 }
-
             }
         });
     }
 
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-
-        GameControl.logD("GameActivityDestory");
-        GameControl.controlCheckThread = false;
-        GameControl.currentQuestion = null;
-        questionFlag = false;
-
-
-        if (agoraSignal != null) {
-            agoraSignal.removeEnventHandler();
-            executorService.execute(new Runnable() {
-                @Override
-                public void run() {
-                    agoraSignal.onLogoutSDKClick();
-                }
-            });
-
-        }
-        leaveChannel();
-        // RtcEngine.destroy(rtcEngine);
-        mRtcEventHandler = null;
-
-        recyclerView = null;
-        messageRecyclerViewAdapter = null;
-
-        checkBox_item.clear();
-        checkBox_item = null;
-
-        board.clear();
-        board = null;
-
-        questionTimeHandler = null;
-        executorService = null;
-
-        System.gc();
-    }
-
-
-    private RtcEngine rtcEngine;
-
-
-    private IRtcEngineEventHandler mRtcEventHandler = new IRtcEngineEventHandler() { // Tutorial Step 1
-        @Override
-        public void onFirstRemoteVideoDecoded(final int uid, int width, int height, int elapsed) { // Tutorial Step 5
-            // logD("onFirstRemoteVideoDecode");
-            GameControl.logD("onFirstRemoteVideoDecoded");
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    setupRemoteVideo(uid);
-                }
-            });
-        }
-
-
-        @Override
-        public void onUserOffline(int uid, int reason) { // Tutorial Step 7
-            logD("onUserOffline");
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    onRemoteUserLeft();
-                }
-            });
-            GameControl.logD("onUserOffline");
-        }
-
-        @Override
-        public void onUserMuteVideo(final int uid, final boolean muted) { // Tutorial Step 10
-
-            GameControl.logD("onUserMuteVideo");
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    onRemoteUserVideoMuted(uid, muted);
-                }
-            });
-        }
-
-        @Override
-        public void onJoinChannelSuccess(String channel, int uid, int elapsed) {
-            GameControl.logD("onJoinChannelSuccess");
-            super.onJoinChannelSuccess(channel, uid, elapsed);
-            logD("onJOinChannelSuccess");
-
-            GameControl.logD("onJoinChannelSuccess  channel  =  " + channel);
-
-
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-
-
-                }
-            });
-
-        }
-
-        @Override
-        public void onReceiveSEI(final String info) {
-            super.onReceiveSEI(info);
-            GameControl.logD("onReceiveSEI  = " + info);
-
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    JSONObject jsonObject = null;
-                    int sid = -1;
-                    if (info != null) {
-                        try {
-                            jsonObject = new JSONObject(info);
-                            // sid = jsonObject.g etInt("questionId");
-                            JSONObject data = jsonObject.getJSONObject("data");
-
-                            sid = data.getInt("questionId");
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-
-                        if (GameControl.currentQuestion != null) {
-                            logD("sei   = " + sid + "   questionId  =  " + GameControl.currentQuestion.getId());
-
-                            if (sid == GameControl.currentQuestion.getId() && isFirstTimeSEI) {
-                                logD("sei  show");
-                                showQuestion();
-                                isFirstTimeSEI = false;
-                            }
-                        }
-                    }
-                }
-            });
-        }
-    };
-
-    private boolean isFirstTimeSEI = true;
-
-    private boolean questionFlag = true;
     private Handler questionTimeHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -698,7 +527,7 @@ public class GameActivity extends Activity {
                 case 0:
                     int questime = (int) msg.obj;
                     //logD("questionTime  = " + questime);
-                    GameControl.logD("questionReduceTime  =  " + questime);
+                    GameControl.logD(tag + " questionReduceTime  =  " + questime);
                     if (questime < 0) {
 
                         questionTime = GameControl.timeOut;
@@ -706,9 +535,7 @@ public class GameActivity extends Activity {
                     }
                     time_reduce.setTextColor(Color.RED);
                     time_reduce.setText(questime + " s");
-
                     if (questime == 0) {
-
                         questionFlag = false;
                         if (GameControl.serverWheatherCanPlay && GameControl.clientWheatherCanPlay) {
                             //  GameControl.clientWheatherCanPlay = false;
@@ -721,9 +548,7 @@ public class GameActivity extends Activity {
                         questionTime = GameControl.timeOut;
                     }
                     break;
-
                 case 1:
-
                     if (game_layout.getVisibility() == View.VISIBLE) {
                         game_layout.setVisibility(View.GONE);
                         time_reduce.setTextColor(Color.RED);
@@ -740,20 +565,12 @@ public class GameActivity extends Activity {
 
     };
 
-    private int questionTime;
-    private ImageView gameResult;
-
-
     private void showQuestion() {
-
-
         executorService.execute(new Runnable() {
             @Override
             public void run() {
                 questionTime = GameControl.timeOut;
-
-
-                GameControl.logD("showQuestion questionFlag = " + questionFlag);
+                GameControl.logD(tag + " showQuestion questionFlag = " + questionFlag);
                 while (questionFlag) {
 
                     try {
@@ -761,7 +578,6 @@ public class GameActivity extends Activity {
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-
                     questionTime = questionTime - 1;
                     Message message = questionTimeHandler.obtainMessage();
                     message.what = 0;
@@ -775,14 +591,12 @@ public class GameActivity extends Activity {
             }
         });
 
-
-        logD("  runOnUiThread   ");
         //questionFlag = true;
         GameActivity.this.runOnUiThread(new Runnable() {
             @Override
             public void run() {
 
-                GameControl.logD("GameControl serverWheatherCanPlay = " + GameControl.serverWheatherCanPlay + "  GameControl.clientWheatherCanPlay  = " + GameControl.clientWheatherCanPlay);
+                GameControl.logD(tag + " GameControl serverWheatherCanPlay = " + GameControl.serverWheatherCanPlay + "  GameControl.clientWheatherCanPlay  = " + GameControl.clientWheatherCanPlay);
 
                 if (GameControl.serverWheatherCanPlay && GameControl.clientWheatherCanPlay) {
                     // logD("gameActivituy  =  " + "1111");
@@ -796,44 +610,32 @@ public class GameActivity extends Activity {
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
-
                 }
             }
         });
     }
 
     private boolean checkSelfPermissions() throws Exception {
-
-        Log.d("zhang   ", "checkSelfPermissionssss");
         return checkSelfPermission(Manifest.permission.RECORD_AUDIO, 0) &&
                 checkSelfPermission(Manifest.permission.CAMERA, 1) &&
                 checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, 2);
     }
-
 
     public boolean checkSelfPermission(String permission, int requestCode) throws Exception {
         // log.debug("checkSelfPermission " + permission + " " + requestCode);
         if (ContextCompat.checkSelfPermission(this,
                 permission)
                 != PackageManager.PERMISSION_GRANTED) {
-            Log.d("zhang   ", "  permission != granted");
-
             ActivityCompat.requestPermissions(this,
                     new String[]{permission},
                     requestCode);
             return false;
         }
-
-        Log.d("zhang  ", " permission  granted");
-
         if (Manifest.permission.CAMERA.equals(permission)) {
-            // getApplication()).initWorkerThread();
-            Log.d("zhang  ", "  camera permission");
-            joinAgoraLiveChannel();
+            workThreadJoinChannel();
         }
         return true;
     }
-
 
     @Override
     public void onRequestPermissionsResult(int requestCode,
@@ -862,12 +664,7 @@ public class GameActivity extends Activity {
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
-                    //  ((AGApplication) getApplication()).initWorkerThread();
-                    try {
-                        joinAgoraLiveChannel();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+                    workThreadJoinChannel();
                 } else {
                     // finish();
                 }
@@ -885,38 +682,6 @@ public class GameActivity extends Activity {
         }
     }
 
-    private void joinAgoraLiveChannel() throws Exception {
-        new Thread() {
-            @Override
-            public void run() {
-                super.run();
-                try {
-                    initAgoraEngine();
-                    setupVideoProfile();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
-            }
-        }.start();
-    }
-
-    // Tutorial Step 2
-    private void setupVideoProfile() {
-        rtcEngine.enableVideo();
-        rtcEngine.setVideoProfile(io.agora.rtc.Constants.VIDEO_PROFILE_360P, false);
-    }
-
-    private void initAgoraEngine() throws Exception {
-        rtcEngine = RtcEngine.create(GameActivity.this, Constants.AGORA_APP_ID, mRtcEventHandler);
-        rtcEngine.setChannelProfile(io.agora.rtc.Constants.CHANNEL_PROFILE_LIVE_BROADCASTING);
-        rtcEngine.setClientRole(io.agora.rtc.Constants.CLIENT_ROLE_AUDIENCE, null);
-        // rtcEngine.setParameters("{\"rtc.hq_mode\": {\"hq\": true, \"broadcaster\":false, \"bitrate\":0}}");
-        GameControl.logD("channelName   account  = " + GameControl.currentUser.channelName + "   " + GameControl.currentUser.account);
-        rtcEngine.joinChannel(null, GameControl.currentUser.channelName, "Extra Optional Data", Integer.parseInt(GameControl.currentUser.account)); // if you do not specify the uid, we will generate the uid for you
-    }
-
-
     // Tutorial Step 5
     private void setupRemoteVideo(int uid) {
         FrameLayout container = (FrameLayout) findViewById(R.id.live_view);
@@ -927,14 +692,6 @@ public class GameActivity extends Activity {
         SurfaceView surfaceView = RtcEngine.CreateRendererView(getBaseContext());
         container.addView(surfaceView);
         rtcEngine.setupRemoteVideo(new VideoCanvas(surfaceView, VideoCanvas.RENDER_MODE_HIDDEN, uid));
-    }
-
-    // Tutorial Step 6
-    private void leaveChannel() {
-        if (rtcEngine != null) {
-            rtcEngine.leaveChannel();
-            RtcEngine.destroy();
-        }
     }
 
     // Tutorial Step 7
@@ -955,20 +712,16 @@ public class GameActivity extends Activity {
         }
     }
 
-
     // private Button button_show;
     private LinearLayout game_layout;
     private Button submit_btn;
     private LinearLayout question_layout;
-
     // private ArrayList<String> questionData = new ArrayList<String>();
     private ArrayList<CheckBox> checkBox_item = new ArrayList<CheckBox>();
     private ArrayList<View> board = new ArrayList<View>();
-
     private TextView game_title;
     private TextView wheath_canPlay_TextView;
     private TextView time_reduce;
-
 
     private void initQuestionLayout() {
         // button_show = findViewById(R.id.show_question_btn);
@@ -977,13 +730,10 @@ public class GameActivity extends Activity {
         game_layout.setVisibility(View.GONE);
         question_layout = findViewById(R.id.question_layout);
         game_title = findViewById(R.id.game_title);
-
         wheath_canPlay_TextView = findViewById(R.id.wheather_canplay_TextView);
         wheath_canPlay_TextView.setVisibility(View.GONE);
         time_reduce = findViewById(R.id.time_reduce);
-
         setSubmitbtnListener();
-
     }
 
     private void setSubmitbtnListener() {
@@ -1016,22 +766,19 @@ public class GameActivity extends Activity {
             if (checkBox.isChecked()) {
                 a = i;
             }
-
         }
-
         if (a == -1) {
             Toast.makeText(GameActivity.this, R.string.answer_is_null_message, Toast.LENGTH_SHORT).show();
         } else {
             Toast.makeText(GameActivity.this, R.string.choose_success_message, Toast.LENGTH_SHORT).show();
         }
-
-        GameControl.logD("submit answer  url = " + Constants.HTTP_SEND_ANSWER_TO_SERVER);
+        GameControl.logD(tag + " submit answer  url = " + Constants.HTTP_SEND_ANSWER_TO_SERVER);
         try {
             AgoraSignal.sendAnswerToserver(GameControl.currentQuestion.getId(), a, new HttpUrlUtils.OnResponse() {
                 @Override
                 public void onResponse(String data) {
                     // logD("sendAnswerToserver   = " + data);
-                    GameControl.logD("sendAnswer OnResponse  =  " + data);
+                    GameControl.logD(tag + " sendAnswer OnResponse  =  " + data);
                 }
             });
         } catch (JSONException e) {
@@ -1049,28 +796,19 @@ public class GameActivity extends Activity {
         checkBox_item.get(result).setBackgroundColor(Color.GREEN);
     }
 
-    private ArrayList answerList;
-
     private void showquestionView(Question question) {
         answerList = new ArrayList();
-        logD("c  :  " + question.getAnswerString().toString());
-        logD("aanswer  = " + answerList.toString());
         question_layout.removeAllViews();
         checkBox_item.clear();
         board.clear();
         submit_btn.setVisibility(View.VISIBLE);
-
         answerList = GameControl.currentQuestion.getAnswerString();
-        logD("showQuestionMid  : " + question.getAnswerString().toString());
-
         String title = question.getQuestion();
         game_title.setTextSize(20);
         int questionId = question.getId() + 1;
         String questionTitle = questionId + "   " + title;
         game_title.setText(questionTitle);
         game_title.setVisibility(View.VISIBLE);
-
-
         for (int i = 0; i < answerList.size(); i++) {
             if (i == 0) {
                 View bo = createBoard();
@@ -1090,9 +828,6 @@ public class GameActivity extends Activity {
         }
         game_layout.setVisibility(View.VISIBLE);
         wheath_canPlay_TextView.setVisibility(View.GONE);
-
-        logD("showQuestionend   : " + question.getAnswerString().toString());
-        logD("showQuestionend   :" + checkBox_item.size() + " ------  question  ---" + game_layout.getVisibility() + "   " + View.VISIBLE);
         //time = 10;
     }
 
@@ -1127,18 +862,8 @@ public class GameActivity extends Activity {
     }
 
     private void getCorrectCheckBox(int positions) {
-
         int question_count = question_layout.getChildCount();
-        GameControl.logD("getCorrectCheckBoxitem =  " + question_count);
-
-        /*for (int i = 0; i < question_count; i++) {
-            View view = question_layout.getChildAt(i).getTag();
-            if ((int)view.getTag() == positions) {
-
-                view.setBackgroundColor(Color.GREEN);
-            }
-        }*/
-
+        GameControl.logD(tag + "getCorrectCheckBoxitem =  " + question_count);
         for (int i = 0; i < question_count; i++) {
             // GameControl.logD("childTag = " + question_layout.getChildAt(i).getTag() + "");
 
@@ -1152,17 +877,7 @@ public class GameActivity extends Activity {
                 view.setBackgroundColor(Color.GREEN);
             }
         }
-
-
-       /* View view = (View) question_layout.getTag(positions);
-
-        if (view != null) {
-            GameControl.logD("view is not null");
-        } else {
-            GameControl.logD("view is null");
-        }*/
     }
-
 
     private View createBoard() {
         View view = new View(GameActivity.this);
@@ -1194,7 +909,7 @@ public class GameActivity extends Activity {
                 // logD("checkWheatherCanPlay -------------");
 
                 //logD(data + "");
-                GameControl.logD("reliveButton  onResponse =  " + data);
+                GameControl.logD(tag + "reliveButton  onResponse =  " + data);
                 if (data.equals(Constants.MESSAGE_TOAST)) {
                     System.out.println(Toast.makeText(GameActivity.this, R.string.connect_net_error_or_server_error, Toast.LENGTH_SHORT));
                 }
@@ -1212,7 +927,6 @@ public class GameActivity extends Activity {
                             submit_btn.setTextColor(Color.BLACK);
                             Toast.makeText(GameActivity.this, R.string.relive_success_message, Toast.LENGTH_SHORT).show();
                             showquestionView(GameControl.currentQuestion);
-                            logD("GameControl CurrentQuestion:  " + GameControl.currentQuestion.getAnswerString().toString());
                         }
                     });
                 } else {
@@ -1223,4 +937,90 @@ public class GameActivity extends Activity {
         });
     }
 
+    @Override
+    public void onFirstRemoteVideoDecoded(final int uid, int width, int height, int elapsed) {
+        GameControl.logD(tag + "onFirstRemoteVideoDecoded");
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                setupRemoteVideo(uid);
+            }
+        });
+    }
+
+    @Override
+    public void onJoinChannelSuccess(String channel, int uid, int elapsed) {
+        GameControl.logD(tag + "onJoinChannelSuccess  channel  =  " + channel);
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+
+            }
+        });
+    }
+
+    @Override
+    public void onReceiveSEI(final String info) {
+        GameControl.logD(tag + "onReceiveSEI  = " + info);
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                JSONObject jsonObject = null;
+                int sid = -1;
+                if (info != null) {
+                    try {
+                        jsonObject = new JSONObject(info);
+                        // sid = jsonObject.g etInt("questionId");
+                        JSONObject data = jsonObject.getJSONObject("data");
+
+                        sid = data.getInt("questionId");
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
+                    if (GameControl.currentQuestion != null) {
+                        if (sid == GameControl.currentQuestion.getId() && isFirstTimeSEI) {
+                            showQuestion();
+                            isFirstTimeSEI = false;
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    @Override
+    public void onUserOffline(int uid, int reason) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                onRemoteUserLeft();
+            }
+        });
+        GameControl.logD(tag + "onUserOffline");
+    }
+
+    @Override
+    public void onUserMuteVideo(final int uid, final boolean muted) {
+        GameControl.logD(tag + "onUserMuteVideo");
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                onRemoteUserVideoMuted(uid, muted);
+            }
+        });
+    }
+
+    private void workThreadJoinChannel() {
+        workerThread = ((HqApplication) getApplication()).getWorkerThread();
+        if (workerThread == null) {
+            ((HqApplication) getApplication()).initWorkerThread();
+        }
+        //joinAgoraLiveChannel();
+        workerThread = ((HqApplication) getApplication()).getWorkerThread();
+        workerThread.eventHandler().addEventHandler(this);
+        workerThread.joinChannel();
+        rtcEngine = workerThread.getRtcEngine();
+    }
 }

@@ -22,7 +22,7 @@ import io.agora.agoraandroidhq.module.Message;
  */
 
 public class MessageRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-    public ArrayList<Message> mMsglist;
+    public ArrayList<Message> mMsglist = new ArrayList<Message>();
 
     private final Context mContext;
     protected final LayoutInflater mInflater;
@@ -35,10 +35,9 @@ public class MessageRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerVie
 
     }
 
-    public MessageRecyclerViewAdapter(Context context, ArrayList<Message> list) {
+    public MessageRecyclerViewAdapter(Context context) {
         mContext = context;
         mInflater = ((Activity) context).getLayoutInflater();
-        mMsglist = list;
     }
 
     @Override

@@ -1,6 +1,7 @@
 package io.agora.agoraandroidhq.control;
 
 import android.content.Context;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 
@@ -11,6 +12,8 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import io.agora.agoraandroidhq.R;
 import io.agora.agoraandroidhq.tools.Constants;
@@ -25,14 +28,14 @@ import io.agora.signaling.hq.AgoraHQSigSDK;
 public class AgoraSignal {
 
     public static AgoraSignal agoraSignal;
-    private static ArrayList<android.os.Handler> messageHandler;
-
+    private static CopyOnWriteArrayList<Handler> messageHandler;
     private String appId;
     private AgoraHQSigSDK agoraHQSigSDK;
     private Context context;
     private String uid;
     private String channelName;
-
+    private String token = "_no_need_token";
+    private static String tag = "[AgoraSignal]  ";
 
     private AgoraSignal(Context context, String appId, String uid, String channelName) {
         this.appId = appId;
@@ -40,36 +43,28 @@ public class AgoraSignal {
         this.uid = uid;
         this.channelName = channelName;
         agoraHQSigSDK = new AgoraHQSigSDK(context, appId);
-        messageHandler = new ArrayList<android.os.Handler>();
-
-
+        messageHandler = new CopyOnWriteArrayList<Handler>();
     }
 
     public static AgoraSignal newInstance(Context context, String appId, String uid, String channelName) {
         if (agoraSignal != null) {
             return agoraSignal;
         } else {
-
-            WeakReference<Context> weakReference =new WeakReference<Context>(context);
+            WeakReference<Context> weakReference = new WeakReference<Context>(context);
             agoraSignal = new AgoraSignal(weakReference.get(), appId, uid, channelName);
             return agoraSignal;
         }
     }
 
-
-    public  void login() {
-
-
-       loginAgoraSignal(uid);
-
+    public void login() {
+        loginAgoraSignal(uid);
     }
 
-    public void addEventHandler(android.os.Handler handler){
-
+    public void addEventHandler(android.os.Handler handler) {
         messageHandler.add(handler);
     }
 
-    public void removeEnventHandler(){
+    public void removeEnventHandler() {
         if (messageHandler.size() > 0) {
             for (android.os.Handler handler : messageHandler) {
                 messageHandler.remove(handler);
@@ -77,10 +72,7 @@ public class AgoraSignal {
         }
     }
 
-
-    private String token = "_no_need_token";;
-
-    private  String getAgoraToken() {
+    private String getAgoraToken() {
         try {
             token = SignalingToken.getToken(appId, null, uid, (int) (System.currentTimeMillis() / 1000) + 100);
         } catch (NoSuchAlgorithmException e) {
@@ -90,31 +82,29 @@ public class AgoraSignal {
         return token;
     }
 
-
     private void loginAgoraSignal(String account) {
 
-        GameControl.logD("loginAgoraSignal =  "+ account + "  channelName  "+ channelName);
-        agoraHQSigSDK.login(account,channelName, token, new AgoraHQSigSDK.EventHandler() {
+        GameControl.logD(tag + "loginAgoraSignal =  " + account + "  channelName  " + channelName);
+        agoraHQSigSDK.login(account, channelName, token, new AgoraHQSigSDK.EventHandler() {
             @Override
             public void onLoginSuccess() {
-              //  Log.e("MainActivity", "success");
-                GameControl.logD("onLoginSuccess");
-                handlerEvent(io.agora.agoraandroidhq.tools.Constants.LOGIN_AGORA_SIGNAL_SUCCESS,0);
-
+                //  Log.e("MainActivity", "success");
+                GameControl.logD(tag + "onLoginSuccess");
+                handlerEvent(io.agora.agoraandroidhq.tools.Constants.LOGIN_AGORA_SIGNAL_SUCCESS, 0);
             }
 
             @Override
             public void onError(int error) {
                 //Log.e("MainActivity", "error:" + error);
-                GameControl.logD("onError");
-                handlerEvent(io.agora.agoraandroidhq.tools.Constants.LOGIN_AGORA_SIGNAL_FAIL,0);
+                GameControl.logD(tag + "onError");
+                handlerEvent(io.agora.agoraandroidhq.tools.Constants.LOGIN_AGORA_SIGNAL_FAIL, 0);
             }
 
             @Override
             public void onChannelMessageReceived(final String channel, final long msgId, final String msg) {
-               // Log.e("收到频道消息", "onChannelMessageReceived:[channel : " + channel + ", msgId : " + msgId + ", msg : " + msg + "]");
-                GameControl.logD("onChannelMessageReceived  channel = "+ channel +"  msg =  " + msg);
-                if(msg!=null) {
+                // Log.e("收到频道消息", "onChannelMessageReceived:[channel : " + channel + ", msgId : " + msgId + ", msg : " + msg + "]");
+                GameControl.logD(tag + "onChannelMessageReceived  channel = " + channel + "  msg =  " + msg);
+                if (msg != null) {
                     handlerEvent(io.agora.agoraandroidhq.tools.Constants.AGORA_SIGNAL_RECEIVE, msg);
                 }
             }
@@ -122,44 +112,39 @@ public class AgoraSignal {
             @Override
             public void onMessageReceivedFrom(final String account, final long msgId, final String msg) {
                 //Log.e("收到点对点消息", "onMessageReceivedFrom:[account : " + account + ", msgId : " + msgId + ", msg : " + msg + "]");
-
-
-
             }
         });
     }
 
 
-    public void sendChannelMessage(String message,String selfMessage){
-        GameControl.logD("sendChannelMessage  = " +message);
-        if(agoraHQSigSDK!=null){
-            GameControl.logD("sendChannelMessage  =");
-            GameControl.logD("agoraHQSigSDK  =  " + agoraHQSigSDK);
+    public void sendChannelMessage(String message, String selfMessage) {
+        GameControl.logD(tag + "sendChannelMessage  = " + message);
+        if (agoraHQSigSDK != null) {
+            GameControl.logD(tag + "sendChannelMessage  =");
+            GameControl.logD(tag + "agoraHQSigSDK  =  " + agoraHQSigSDK);
             agoraHQSigSDK.sendChannelMessage(GameControl.MESSAGE_ID++, message);
-            if(selfMessage!=null) {
+            if (selfMessage != null) {
                 handlerEvent(io.agora.agoraandroidhq.tools.Constants.AGORA_SIGNAL_SEND, selfMessage);
             }
         }
     }
 
     public void onLogoutSDKClick() {
-        GameControl.logD("onLogoutSDKClick  11 ");
+        GameControl.logD(tag + "onLogoutSDKClick  11 ");
         if (agoraHQSigSDK != null) {
             agoraHQSigSDK.logout();
             AgoraSignal.agoraSignal = null;
             agoraHQSigSDK = null;
             agoraSignal = null;
-            GameControl.logD("onLogoutSDKClick  22");
+            GameControl.logD(tag + "onLogoutSDKClick  22");
         }
     }
 
     //        token = "_no_need_token";
-    private void handlerEvent( int what,Object obj) {
+    private void handlerEvent(int what, Object obj) {
         if (messageHandler.size() > 0) {
             for (android.os.Handler handler : messageHandler) {
-
-                GameControl.logD("handlerEvent  =  "+messageHandler.size());
-
+                GameControl.logD(tag + "handlerEvent  =  " + messageHandler.size());
                 android.os.Message m = android.os.Message.obtain();
                 m.what = what;
                 m.obj = obj;
@@ -169,41 +154,32 @@ public class AgoraSignal {
     }
 
     public static void checkRelive(HttpUrlUtils.OnResponse callback) throws JSONException {
-
         Map data = new HashMap();
-        GameControl.logD("checkRelive   uid =  "+GameControl.currentUser.account +"   gid =  "+GameControl.currentUser.channelName);
+        GameControl.logD(tag + "checkRelive   uid =  " + GameControl.currentUser.account + "   gid =  " + GameControl.currentUser.channelName);
         data.put("uid", GameControl.currentUser.account);
         data.put("gid", GameControl.currentUser.channelName);
-
         HttpUrlUtils utils = new HttpUrlUtils();
         utils.execHttpAsyncTask(io.agora.agoraandroidhq.tools.Constants.HTTP_RELIVE, true, callback, data);
-
-
     }
-
 
     public static void sendAnswerToserver(int sid, int result, HttpUrlUtils.OnResponse callback) throws JSONException {
 
         Map data = new HashMap();
-        GameControl.logD("sendAnswerToserver   uid  =  "+GameControl.currentUser.account +"   gid =  "+GameControl.currentUser.channelName +"  sid = "+sid +"  result = "+result );
+        GameControl.logD(tag + "sendAnswerToserver   uid  =  " + GameControl.currentUser.account + "   gid =  " + GameControl.currentUser.channelName + "  sid = " + sid + "  result = " + result);
         data.put("uid", GameControl.currentUser.account);
         data.put("gid", GameControl.currentUser.channelName);
         data.put("sid", sid);
         data.put("result", result);
-
         HttpUrlUtils utils = new HttpUrlUtils();
         utils.execHttpAsyncTask(io.agora.agoraandroidhq.tools.Constants.HTTP_SEND_ANSWER_TO_SERVER, true, callback, data);
     }
 
-
     public static void checkWheatherCanPlay(HttpUrlUtils.OnResponse callback) throws JSONException {
-
-       // String url = "http://123.155.153.87:8000/v1/canplay?gid=10001&uid=24324242";
-        String url = Constants.HTTP_CHECK_WHEATHER_CAN_PLAY+GameControl.currentUser.channelName+"&uid="+GameControl.currentUser.account;
-        GameControl.logD("checkWheatherCanPlay  =  "+ url);
-       HttpUrlUtils utils = new HttpUrlUtils();
+        // String url = "http://123.155.153.87:8000/v1/canplay?gid=10001&uid=24324242";
+        String url = Constants.HTTP_CHECK_WHEATHER_CAN_PLAY + GameControl.currentUser.channelName + "&uid=" + GameControl.currentUser.account;
+        GameControl.logD(tag + "checkWheatherCanPlay  =  " + url);
+        HttpUrlUtils utils = new HttpUrlUtils();
 
         utils.execHttpAsyncTask(url, false, callback, null);
-
     }
 }
