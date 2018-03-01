@@ -72,7 +72,6 @@ import io.agora.rtc.video.VideoCanvas;
 
 public class GameActivity extends BaseActivity implements AGEventHandler {
 
-
     private boolean isFirst = true;
     private String tag = "[GameActivity]   ";
     private RecyclerView recyclerView;
@@ -579,11 +578,12 @@ public class GameActivity extends BaseActivity implements AGEventHandler {
                         e.printStackTrace();
                     }
                     questionTime = questionTime - 1;
-                    Message message = questionTimeHandler.obtainMessage();
-                    message.what = 0;
-                    message.obj = questionTime;
-                    questionTimeHandler.sendMessage(message);
-
+                    if(questionTimeHandler != null) {
+                        Message message = questionTimeHandler.obtainMessage();
+                        message.what = 0;
+                        message.obj = questionTime;
+                        questionTimeHandler.sendMessage(message);
+                    }
                     if (questionTime == -1) {
                         questionFlag = false;
                     }
