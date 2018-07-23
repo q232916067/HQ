@@ -2,6 +2,8 @@
 
 *其他语言: [English](README.md)*
 
+sdk下载地址: (https://apprtcio-my.sharepoint.com/:f:/g/personal/zhangle_agora_io/EplYenyGEDRGmKsu-MadDScBkxXIqQWqNtkCyVYn7pqGSQ?e=5MZE0c)
+
 这个开源示例项目演示了如何利用 Agora SDK 实现多人互动答题。本项目为观众答题端
 
 在这个示例项目中包含了以下功能：
